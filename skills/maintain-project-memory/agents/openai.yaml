@@ -1,0 +1,4 @@
+interface:
+  display_name: "Maintain Project Memory"
+  short_description: "Initialize and keep project memory current"
+  default_prompt: "Use $maintain-project-memory to initialize or update durable project memory."

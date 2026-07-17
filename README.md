@@ -133,4 +133,3 @@ The memory model was inspired by Sergey Pimenov's articles [AGENTS.md / SESSION_
 ## License and publishing
 
 Released under the MIT License. Keep secrets, project-specific documents, generated memory, and private repository data out of this reusable repository.
-
