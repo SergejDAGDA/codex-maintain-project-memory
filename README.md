@@ -84,15 +84,123 @@ It creates only missing files under `docs/project-memory/` and skips existing fi
 
 Do not pass `--overwrite` unless the existing memory files have been reviewed and replacing them is intentional.
 
-## Typical bootstrap prompt
+## Common prompts
+
+Use these prompts as starting points. Replace placeholder paths with real
+locations when documentation is outside the repository. The project root usually
+does not need to be supplied when the task is opened in the project folder:
+Codex should detect it with `git rev-parse --show-toplevel` and otherwise use
+the current task directory.
+
+### New project with source documents
 
 ```text
-Use $maintain-project-memory to bootstrap this existing project.
+Use $maintain-project-memory.
 
-Source documents are in docs/context. Inspect the repository and current Git
-state, use focused code discovery, and create only missing memory files. Keep
-facts separate from assumptions. Do not replace AGENTS.md; propose a merge.
-Use the approve-decisions policy and stop for material conflicts.
+This is a new project. Bootstrap project memory from the supplied source
+documents and repository evidence.
+
+Source documents / baseline:
+<DOCS_PATH_OR_LIST>
+
+Detect the project root yourself: use git rev-parse --show-toplevel when
+available; otherwise use the current task directory.
+
+Create or update only:
+- AGENTS.md
+- docs/project-memory/PROJECT.md
+- docs/project-memory/STATUS.md
+- docs/project-memory/DECISIONS.md
+- docs/project-memory/SESSION_LOG.md
+- docs/project-memory/HANDOFF.md
+
+Keep AGENTS.md as operating guidance and source routing, not as the full product
+specification. Put product facts in PROJECT.md and consequential choices in
+DECISIONS.md.
+
+If documentation is outside the repository, record it as an external/non-portable
+baseline source.
+
+Update policy: notify.
+Run audit_project_memory.py when available.
+```
+
+### Existing project
+
+```text
+Use $maintain-project-memory.
+
+This is an existing project. Synchronize project memory with the current
+repository state without changing code, configuration, or product documents.
+
+Additional documentation / baseline, if any:
+<DOCS_PATH_OR_LIST_OR_EMPTY>
+
+Detect the project root yourself. Read AGENTS.md, README, docs/*,
+MVP/requirements/architecture/roadmap documents, and existing
+docs/project-memory/* when present.
+
+Compare baseline documents with current repository evidence. Classify
+divergences as Consistent with baseline, Approved evolution, Implemented,
+approval unverified, Unresolved conflict, or Regression.
+
+Allowed files:
+- AGENTS.md
+- docs/project-memory/*
+
+Update policy: notify.
+Run audit_project_memory.py when available.
+Report sources read, files changed, divergences, unresolved decisions, and audit
+result.
+```
+
+### Start from current repo and chat only
+
+```text
+Use $maintain-project-memory.
+
+No separate source package is available. Initialize or update project memory from
+the current repository, current chat, and completed work.
+
+Treat current chat as supporting context, not automatic approval. Put unsupported
+requirements in Proposed, Unverified, or Assumption.
+
+Read focused repository evidence instead of reading the entire repo.
+Do not change code, configuration, or product documents.
+Update policy: notify.
+```
+
+### Checkpoint after concept change
+
+```text
+Use $maintain-project-memory.
+
+The project concept has changed:
+<SHORT_DESCRIPTION_OF_NEW_DIRECTION>
+
+Record this as Approved evolution only if this message is explicit approval or
+another concrete approval source exists.
+
+Update DECISIONS.md, PROJECT.md, STATUS.md, and SESSION_LOG.md.
+Update AGENTS.md only if agent operating rules, source routing, or memory policy
+changed.
+
+Do not let older MVP/baseline documents override the approved new direction.
+Do not change code.
+Update policy: notify.
+```
+
+### Updating this skill later
+
+```text
+Use $maintain-project-memory and skill-creator.
+
+Update the maintain-project-memory skill itself. Keep SKILL.md lean; put
+user-facing usage examples in README.md and README.ru.md unless the behavior must
+be enforced by the agent.
+
+After editing, validate the skill structure, inspect the diff, commit, push, and
+publish a patch release.
 ```
 
 ## Memory model
