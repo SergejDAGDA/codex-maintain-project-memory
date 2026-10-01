@@ -16,6 +16,19 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("Project memory schema: `project-memory/v1`", text)
         self.assertIn("Canonical project-memory root: `docs/project-memory`", text)
 
+    def test_project_start_routing_is_explicit(self) -> None:
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        interface = self.read("agents/openai.yaml")
+        self.assertIn("## Project-start routing", lifecycle)
+        self.assertIn("route through Bootstrap before or alongside the first material implementation stage", lifecycle)
+        self.assertIn("start or resumption of substantial project work", interface)
+
+    def test_protocol_v2_has_one_supported_canonical_root(self) -> None:
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        self.assertIn("supports exactly one canonical project-memory root per project", lifecycle)
+        self.assertIn("at `docs/project-memory`", lifecycle)
+        self.assertIn("do not claim protocol v2 is current merely by changing the marker value", lifecycle)
+
     def test_session_start_freshness_is_protocol_not_new_operation(self) -> None:
         skill = self.read("SKILL.md")
         lifecycle = self.read("references/lifecycle-protocol.md")
