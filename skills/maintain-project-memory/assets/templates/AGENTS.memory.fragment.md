@@ -39,6 +39,6 @@ After a meaningful verified stage:
 - update `HANDOFF.md` only for substantial unfinished work and reset it when that workstream finishes;
 - report every memory file changed.
 
-Before any Checkpoint or Handoff write, re-read the target memory files and re-check repository identity. If project-memory or repository HEAD changed since this session loaded its context, reconcile the newer state instead of overwriting it from a stale base.
+Before any Checkpoint or Handoff write, re-read the target memory files and re-check repository identity. If canonical project-memory or repository HEAD changed unexpectedly outside the changes made by this session, load and reconcile the newer state instead of overwriting it from a stale base.
 
 Never store secrets, hidden reasoning, or duplicated machine-readable configuration in project memory.
