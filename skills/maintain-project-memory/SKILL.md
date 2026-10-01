@@ -149,7 +149,7 @@ Keep machine-specific absolute paths out of `AGENTS.md` unless the path is an in
 8. Fill documents with concise statements and evidence pointers. Preserve every canonical heading from the templates exactly; add subsections below them instead of renaming them.
 9. Label uncertain material as `Proposed`, `Assumption`, `Unverified`, or `Conflict`.
 10. Present material conflicts and decisions for approval.
-11. Merge the canonical project-memory protocol into `AGENTS.md` without removing project-specific guidance. New/adopted projects should record `Project memory protocol: maintain-project-memory/v2`, `Project memory schema: project-memory/v1`, and one canonical project-memory root.
+11. Merge the canonical project-memory protocol into `AGENTS.md` without removing project-specific guidance. New/adopted protocol-v2 projects use `Project memory protocol: maintain-project-memory/v2`, `Project memory schema: project-memory/v1`, and `Canonical project-memory root: docs/project-memory`.
 12. Resolve the directory containing this `SKILL.md`, then run `<skill-directory>/scripts/audit_project_memory.py <project-root>`. The audit script belongs to the installed skill and is not expected to exist in the target project. Review all findings and the resulting diff before completion.
 
 Never replace an existing `AGENTS.md` wholesale. Merge only the required memory protocol and preserve project-specific instructions. Do not automatically rewrite existing `STATUS.md`, `HANDOFF.md`, `SESSION_LOG.md`, or decision history merely because the local protocol is older; adoption must preserve history and propose the smallest reviewed migration.
@@ -241,7 +241,7 @@ Write `HANDOFF.md` for substantial unfinished work only. Include:
 - explicit no-touch boundaries;
 - the next safe action.
 
-Before any Handoff write, perform the same optimistic revalidation used by Checkpoint. If project memory or repository HEAD changed after the session loaded its context, reconcile the newer state first.
+Before any Handoff write, perform the same optimistic revalidation used by Checkpoint. If canonical project memory or repository HEAD changed unexpectedly outside the changes made by this session, load and reconcile the newer state first.
 
 Keep `HANDOFF.md` replaceable rather than cumulative. When the workstream finishes, reset it to the empty template after preserving durable facts elsewhere. Deployment/release history belongs in operational records or `SESSION_LOG.md`, not in active project-memory handoff.
 
@@ -308,7 +308,9 @@ For current/adopted protocol v2 projects, ensure the project-local memory block 
 
 - `Project memory protocol: \`maintain-project-memory/v2\``;
 - `Project memory schema: \`project-memory/v1\``;
-- `Canonical project-memory root: \`docs/project-memory\`` unless the project intentionally declares a different canonical root and the tooling/workflow supports it.
+- `Canonical project-memory root: \`docs/project-memory\``.
+
+Protocol v2 uses `docs/project-memory` as the canonical memory root. A separate repository/project root may have its own `docs/project-memory`, but mirrors, staging trees, deployment copies, and backups do not become canonical merely by containing the same files.
 
 Do not convert an older/unversioned project merely by adding markers. First perform the adoption review and reconcile legacy current-state content. Preserve an existing `notify` or `strict` update policy unless the user changes it; protocol migration is not a policy migration.
 
