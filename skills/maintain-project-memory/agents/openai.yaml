@@ -1,4 +1,4 @@
 interface:
   display_name: "Maintain Project Memory"
   short_description: "Initialize, adopt, and keep project memory current"
-  default_prompt: "Use $maintain-project-memory to initialize, adopt, audit, or update durable project memory."
+  default_prompt: "Use $maintain-project-memory at the start or resumption of substantial project work to bootstrap/adopt project memory, run freshness checks, record checkpoints, audit drift, or prepare a handoff."
