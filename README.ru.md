@@ -243,6 +243,17 @@ memory policy или memory protocol.
 Политика обновления: notify.
 ```
 
+### Обновление этого навыка в будущем
+
+```text
+Используй $maintain-project-memory и skill-creator.
+
+Обнови сам навык maintain-project-memory. Держи SKILL.md enforceable; длинные
+пользовательские примеры размещай в README.md и README.ru.md.
+
+После правок запусти repository tests, проверь diff и используй reviewed PR.
+```
+
 ## Модель памяти
 
 | Файл | Назначение |
