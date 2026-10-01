@@ -70,6 +70,33 @@ class AuditProjectMemoryTests(unittest.TestCase):
         self.assertIn("missing canonical memory-root marker", joined)
         self.assertFalse(any(item.startswith("ERROR AGENTS.md: missing project-memory") for item in findings))
 
+    def test_conflicting_protocol_markers_are_errors(self) -> None:
+        root = self.make_project()
+        agents = root / "AGENTS.md"
+        text = agents.read_text(encoding="utf-8")
+        agents.write_text(
+            text + "\nProject memory protocol: `maintain-project-memory/v1`\n",
+            encoding="utf-8",
+        )
+        findings = AUDIT.audit(root, stale_days=99999)
+        self.assertIn(
+            "ERROR AGENTS.md: multiple project-memory protocol markers",
+            findings,
+        )
+
+    def test_noncanonical_memory_root_is_reported(self) -> None:
+        root = self.make_project()
+        agents = root / "AGENTS.md"
+        text = agents.read_text(encoding="utf-8").replace(
+            "Canonical project-memory root: `docs/project-memory`",
+            "Canonical project-memory root: `memory`",
+        )
+        agents.write_text(text, encoding="utf-8")
+        findings = AUDIT.audit(root, stale_days=99999)
+        self.assertTrue(
+            any("canonical memory root 'memory' differs" in item for item in findings)
+        )
+
     def test_dated_sections_in_status_and_handoff_are_flagged(self) -> None:
         root = self.make_project()
         status = root / "docs" / "project-memory" / "STATUS.md"
