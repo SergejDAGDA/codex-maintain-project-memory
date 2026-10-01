@@ -8,6 +8,7 @@ import hashlib
 import json
 import subprocess
 from pathlib import Path
+from typing import Optional
 
 
 MEMORY_FILES = (
@@ -20,7 +21,7 @@ MEMORY_FILES = (
 )
 
 
-def _sha256(path: Path) -> str | None:
+def _sha256(path: Path) -> Optional[str]:
     if not path.exists() or not path.is_file():
         return None
     digest = hashlib.sha256()
