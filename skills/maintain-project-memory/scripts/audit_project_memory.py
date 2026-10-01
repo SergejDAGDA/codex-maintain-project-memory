@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Run structural checks on project-memory files."""
+"""Run structural and optional adoption/freshness checks on project-memory files."""
 
 from __future__ import annotations
 
 import argparse
+import os
 import re
+import subprocess
 from datetime import date, datetime
 from pathlib import Path
 
@@ -30,10 +32,117 @@ VAGUE_VERIFICATION = (r"\baudit\s+used\b", r"\bused\s+during\s+.*audit\s+cycle\b
 DECISION_STATUSES = {"Proposed", "Unverified", "Approved", "Superseded", "Rejected"}
 PROVENANCE_VALUES = {"user-approved", "source-attributed", "agent-generated/unverified"}
 CLAIM_KEY_PATTERN = r"[a-z0-9_-]+(?:\.[a-z0-9_-]+)+"
+EXPECTED_PROTOCOL = "maintain-project-memory/v2"
+EXPECTED_SCHEMA = "project-memory/v1"
+EXPECTED_MEMORY_ROOT = "docs/project-memory"
+SKIP_SCAN_DIRS = {
+    ".git",
+    ".hg",
+    ".svn",
+    "node_modules",
+    ".venv",
+    "venv",
+    "dist",
+    "build",
+    "vendor",
+    "target",
+    ".cache",
+}
 
 
-def audit(project_root: Path, stale_days: int) -> list[str]:
-    memory_root = project_root.resolve() / "docs" / "project-memory"
+def _marker_values(text: str, label: str) -> list[str]:
+    return re.findall(
+        rf"^{re.escape(label)}:\s*`([^`]+)`\.?\s*$",
+        text,
+        re.MULTILINE,
+    )
+
+
+def _git_identity(project_root: Path) -> dict[str, str]:
+    def run(*args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", "-C", str(project_root), *args],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+
+    try:
+        top = run("rev-parse", "--show-toplevel")
+    except OSError:
+        return {"status": "unavailable"}
+    if top.returncode != 0:
+        return {"status": "unavailable"}
+
+    head = run("rev-parse", "HEAD")
+    branch = run("branch", "--show-current")
+    dirty = run("status", "--porcelain")
+    return {
+        "status": "git",
+        "root": top.stdout.strip(),
+        "branch": branch.stdout.strip() or "detached",
+        "head": head.stdout.strip() if head.returncode == 0 else "unborn",
+        "dirty": "yes" if dirty.stdout.strip() else "no",
+    }
+
+
+def _nested_memory_roots(project_root: Path) -> list[Path]:
+    project_root = project_root.resolve()
+    canonical = (project_root / EXPECTED_MEMORY_ROOT).resolve()
+    found: list[Path] = []
+    for root, dirs, _files in os.walk(project_root):
+        dirs[:] = [name for name in dirs if name not in SKIP_SCAN_DIRS]
+        path = Path(root)
+        if path.name == "project-memory" and path.parent.name == "docs":
+            resolved = path.resolve()
+            if resolved != canonical:
+                found.append(resolved)
+            dirs[:] = []
+    return sorted(set(found))
+
+
+def adoption_report(project_root: Path) -> list[str]:
+    project_root = project_root.resolve()
+    agents = project_root / "AGENTS.md"
+    agents_text = agents.read_text(encoding="utf-8") if agents.exists() else ""
+
+    protocol_values = _marker_values(agents_text, "Project memory protocol")
+    schema_values = _marker_values(agents_text, "Project memory schema")
+    root_values = _marker_values(agents_text, "Canonical project-memory root")
+
+    protocol = protocol_values[0] if len(protocol_values) == 1 else "legacy/unversioned"
+    schema = schema_values[0] if len(schema_values) == 1 else "legacy/unversioned"
+    memory_root = root_values[0] if len(root_values) == 1 else EXPECTED_MEMORY_ROOT
+
+    handoff = project_root / EXPECTED_MEMORY_ROOT / "HANDOFF.md"
+    if not handoff.exists():
+        handoff_state = "missing"
+    else:
+        text = handoff.read_text(encoding="utf-8")
+        handoff_state = "empty" if "No active handoff." in text else "active-or-legacy"
+
+    git = _git_identity(project_root)
+    if git["status"] == "git":
+        vcs = f"git branch={git['branch']} head={git['head']} dirty={git['dirty']}"
+    else:
+        vcs = "unavailable"
+
+    nested = _nested_memory_roots(project_root)
+    lines = [
+        f"ADOPTION protocol={protocol}",
+        f"ADOPTION schema={schema}",
+        f"ADOPTION canonical_root={memory_root}",
+        f"ADOPTION vcs={vcs}",
+        f"ADOPTION handoff={handoff_state}",
+        f"ADOPTION nested_memory_roots={len(nested)}",
+    ]
+    lines.extend(f"ADOPTION nested_memory_root={path}" for path in nested)
+    return lines
+
+
+def audit(project_root: Path, stale_days: int, adoption: bool = False) -> list[str]:
+    project_root = project_root.resolve()
+    memory_root = project_root / "docs" / "project-memory"
     findings: list[str] = []
 
     for filename, headings in REQUIRED_HEADINGS.items():
@@ -55,6 +164,13 @@ def audit(project_root: Path, stale_days: int) -> list[str]:
                     f"ERROR {filename}: review annotation was written as durable memory"
                 )
                 break
+
+        dated_sections = re.findall(r"^##\s+\d{4}-\d{2}-\d{2}\b", text, re.MULTILINE)
+        if filename in {"STATUS.md", "HANDOFF.md"} and dated_sections:
+            findings.append(
+                f"WARN {filename}: contains {len(dated_sections)} dated section(s); "
+                "keep current/active state replaceable and move history to SESSION_LOG.md"
+            )
 
         if filename == "STATUS.md":
             for pattern in PREDICTED_CHECK_SUCCESS:
@@ -122,7 +238,7 @@ def audit(project_root: Path, stale_days: int) -> list[str]:
                     findings.append(f"ERROR DECISIONS.md: duplicate Claim key {key!r}")
                 seen_keys.add(key)
 
-    agents = project_root.resolve() / "AGENTS.md"
+    agents = project_root / "AGENTS.md"
     if agents.exists():
         agents_text = agents.read_text(encoding="utf-8")
         if agents.stat().st_size > 32 * 1024:
@@ -137,6 +253,50 @@ def audit(project_root: Path, stale_days: int) -> list[str]:
         elif len(policies) > 1:
             findings.append("ERROR AGENTS.md: multiple Memory update policies")
 
+        protocols = _marker_values(agents_text, "Project memory protocol")
+        if not protocols:
+            findings.append(
+                f"WARN AGENTS.md: missing project-memory protocol marker; expected {EXPECTED_PROTOCOL!r}"
+            )
+        elif len(protocols) > 1:
+            findings.append("ERROR AGENTS.md: multiple project-memory protocol markers")
+        elif protocols[0] != EXPECTED_PROTOCOL:
+            findings.append(
+                f"WARN AGENTS.md: protocol {protocols[0]!r} differs from current {EXPECTED_PROTOCOL!r}"
+            )
+
+        schemas = _marker_values(agents_text, "Project memory schema")
+        if not schemas:
+            findings.append(
+                f"WARN AGENTS.md: missing project-memory schema marker; expected {EXPECTED_SCHEMA!r}"
+            )
+        elif len(schemas) > 1:
+            findings.append("ERROR AGENTS.md: multiple project-memory schema markers")
+        elif schemas[0] != EXPECTED_SCHEMA:
+            findings.append(
+                f"WARN AGENTS.md: schema {schemas[0]!r} differs from current {EXPECTED_SCHEMA!r}"
+            )
+
+        roots = _marker_values(agents_text, "Canonical project-memory root")
+        if not roots:
+            findings.append(
+                f"WARN AGENTS.md: missing canonical memory-root marker; expected {EXPECTED_MEMORY_ROOT!r}"
+            )
+        elif len(roots) > 1:
+            findings.append("ERROR AGENTS.md: multiple canonical memory-root markers")
+        elif roots[0] != EXPECTED_MEMORY_ROOT:
+            findings.append(
+                f"WARN AGENTS.md: canonical memory root {roots[0]!r} differs from expected {EXPECTED_MEMORY_ROOT!r}"
+            )
+    else:
+        findings.append("WARN AGENTS.md: missing project-local memory protocol")
+
+    if adoption:
+        for nested in _nested_memory_roots(project_root):
+            findings.append(
+                f"WARN nested project-memory root detected: {nested}; classify it as separate or non-canonical"
+            )
+
     return findings
 
 
@@ -144,6 +304,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("project_root", type=Path)
     parser.add_argument("--stale-days", type=int, default=30)
+    parser.add_argument(
+        "--adoption",
+        action="store_true",
+        help="Print read-only protocol/VCS/canonical-root adoption information and scan for nested memory roots.",
+    )
     args = parser.parse_args()
 
     if not args.project_root.exists() or not args.project_root.is_dir():
@@ -151,7 +316,10 @@ def main() -> int:
     if args.stale_days < 0:
         parser.error("--stale-days must be non-negative")
 
-    findings = audit(args.project_root, args.stale_days)
+    if args.adoption:
+        print("\n".join(adoption_report(args.project_root)))
+
+    findings = audit(args.project_root, args.stale_days, adoption=args.adoption)
     if findings:
         print("\n".join(findings))
         print(f"SUMMARY findings={len(findings)}")
