@@ -12,7 +12,20 @@ Canonical project-local guidance uses these markers:
 
 The protocol marker tracks lifecycle/routing behavior independently of the installed skill version. The schema marker tracks the durable file model independently of protocol changes.
 
+Protocol v2 supports exactly one canonical project-memory root per project, at `docs/project-memory`. A project that intentionally needs a different durable layout requires explicit future protocol/tooling support; do not claim protocol v2 is current merely by changing the marker value.
+
 A missing or older marker is an adoption signal, not proof that the memory is wrong. Do not rewrite a project automatically merely because the installed skill is newer.
+
+## Project-start routing
+
+Use project memory as an early coordination layer for substantial software projects rather than as a rescue mechanism added only after drift appears.
+
+- If a substantial new project has no project-memory protocol yet, route through Bootstrap before or alongside the first material implementation stage unless the user explicitly opts out.
+- If an existing project already has project-memory files or memory guidance but lacks current protocol markers, treat it as adoption/migration: perform the read-only adoption review before relying on the old memory as current authority.
+- If the project is already on the current protocol, run the session-start preflight below before material work.
+- Do not Bootstrap trivial experiments, throwaway snippets, or repositories where durable cross-session coordination is not useful.
+
+The goal is not to force every task through a memory write. The goal is to establish one shared durable project model early enough that later chats and agents do not independently reconstruct project state.
 
 ## Session-start preflight
 
@@ -31,7 +44,7 @@ When Git is unavailable, do not fabricate a revision or treat the project as def
 
 ## Canonical ownership
 
-Each project root has one declared canonical project-memory root. By default it is `docs/project-memory`.
+Each project root has one canonical project-memory root: `docs/project-memory` under protocol v2.
 
 - `maintain-project-memory` owns lifecycle semantics for `AGENTS.md` memory protocol and canonical project-memory files.
 - Other workflows may read project memory as evidence and report stale or conflicting content, but should route corrections through this lifecycle instead of opportunistically rewriting it.
