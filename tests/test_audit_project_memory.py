@@ -106,8 +106,87 @@ class AuditProjectMemoryTests(unittest.TestCase):
 
         findings = AUDIT.audit(root, stale_days=99999)
         joined = "\n".join(findings)
-        self.assertIn("WARN STATUS.md: contains 1 dated section", joined)
+        self.assertIn("WARN STATUS.md: likely historical accumulation in 1 section", joined)
         self.assertIn("WARN HANDOFF.md: contains 1 dated section", joined)
+
+    def test_current_status_dates_do_not_trigger_history_warning(self) -> None:
+        root = self.make_project()
+        status = root / "docs" / "project-memory" / "STATUS.md"
+        text = status.read_text(encoding="utf-8").replace("YYYY-MM-DD", "2026-10-04", 1)
+        text = text.replace(
+            "- Runtime: Not verified.",
+            "- Runtime: verified on 2026-10-04.\n- Previous production observation: 2026-10-03.",
+        )
+        status.write_text(text, encoding="utf-8")
+
+        findings = AUDIT.audit(root, stale_days=99999)
+        self.assertFalse(any("historical accumulation" in item for item in findings))
+        report = AUDIT.adoption_report(root)
+        self.assertIn(
+            "ADOPTION status_history=clean count=0 session_log_date_overlap=none",
+            report,
+        )
+
+    def test_single_dated_latest_section_is_not_enough_for_accumulation_signal(self) -> None:
+        root = self.make_project()
+        status = root / "docs" / "project-memory" / "STATUS.md"
+        status.write_text(
+            status.read_text(encoding="utf-8")
+            + "\n## Latest verification note\n\nObserved: 2026-09-23\n",
+            encoding="utf-8",
+        )
+
+        findings = AUDIT.audit(root, stale_days=99999)
+        self.assertFalse(any("historical accumulation" in item for item in findings))
+
+    def test_repeated_latest_historical_sections_are_detected(self) -> None:
+        root = self.make_project()
+        status = root / "docs" / "project-memory" / "STATUS.md"
+        status.write_text(
+            status.read_text(encoding="utf-8")
+            + "\n## Latest checkpoint\n\nDate: 2026-09-10\nOld state A.\n"
+            + "\n## Latest audit\n\nDate: 2026-09-11\nOld state B.\n"
+            + "\n## Latest correction\n\nDate: 2026-09-12\nOld state C.\n",
+            encoding="utf-8",
+        )
+
+        findings = AUDIT.audit(root, stale_days=99999)
+        joined = "\n".join(findings)
+        self.assertIn("likely historical accumulation in 3 section(s)", joined)
+        self.assertIn("session-log date overlap=none", joined)
+        report = AUDIT.adoption_report(root)
+        self.assertIn(
+            "ADOPTION status_history=likely-accumulation count=3 session_log_date_overlap=none",
+            report,
+        )
+
+    def test_repeated_latest_history_reports_full_session_log_date_overlap(self) -> None:
+        root = self.make_project()
+        memory = root / "docs" / "project-memory"
+        status = memory / "STATUS.md"
+        session_log = memory / "SESSION_LOG.md"
+        status.write_text(
+            status.read_text(encoding="utf-8")
+            + "\n## Latest checkpoint\n\nDate: 2026-09-10\nOld state A.\n"
+            + "\n## Latest audit\n\nDate: 2026-09-11\nOld state B.\n",
+            encoding="utf-8",
+        )
+        session_log.write_text(
+            session_log.read_text(encoding="utf-8")
+            + "\n## 2026-09-10 checkpoint\n\n- Old state A.\n"
+            + "\n## 2026-09-11 audit\n\n- Old state B.\n",
+            encoding="utf-8",
+        )
+
+        findings = AUDIT.audit(root, stale_days=99999)
+        joined = "\n".join(findings)
+        self.assertIn("session-log date overlap=full", joined)
+        self.assertIn("review for duplicate ownership", joined)
+        report = AUDIT.adoption_report(root)
+        self.assertIn(
+            "ADOPTION status_history=likely-accumulation count=2 session_log_date_overlap=full",
+            report,
+        )
 
     def test_adoption_report_handles_project_without_git(self) -> None:
         root = self.make_project()
@@ -117,6 +196,7 @@ class AuditProjectMemoryTests(unittest.TestCase):
         self.assertIn("ADOPTION schema=project-memory/v1", joined)
         self.assertIn("ADOPTION vcs=unavailable", joined)
         self.assertIn("ADOPTION handoff=empty", joined)
+        self.assertIn("ADOPTION status_history=clean count=0", joined)
 
     def assert_handoff_state(self, content: str, expected: str) -> None:
         root = self.make_project()
