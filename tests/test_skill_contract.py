@@ -37,9 +37,20 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("scripts/check_skill_freshness.py", lifecycle)
         self.assertIn("canonical GitHub `main`", freshness)
         self.assertIn("`current`", freshness)
+        self.assertIn("`verified-local`", freshness)
         self.assertIn("`different`", freshness)
         self.assertIn("`unverified`", freshness)
         self.assertIn("verify installed skill freshness against canonical main", interface)
+
+    def test_offline_fallback_requires_external_receipt_and_expected_commit(self) -> None:
+        freshness = self.read("references/skill-freshness.md")
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        self.assertIn("scripts/record_skill_provenance.py --canonical-commit", freshness)
+        self.assertIn("~/.codex/skill-provenance/maintain-project-memory.json", freshness)
+        self.assertIn("--expected-commit", freshness)
+        self.assertIn("WRITE_ELIGIBLE yes", freshness)
+        self.assertIn("does **not** independently prove that GitHub `main` has not advanced", freshness)
+        self.assertIn("user-confirmed install", lifecycle)
 
     def test_skill_freshness_is_distinct_from_project_protocol(self) -> None:
         freshness = self.read("references/skill-freshness.md")
