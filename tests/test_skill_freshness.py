@@ -2,6 +2,7 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,6 +41,38 @@ class SkillFreshnessTests(unittest.TestCase):
     def test_exact_maps_have_no_differences(self) -> None:
         sample = {"SKILL.md": "abc", "scripts/x.py": "def"}
         self.assertEqual(MODULE.compare_blob_maps(sample, dict(sample)), ((), (), ()))
+
+    def test_canonical_blob_map_reports_commit_and_filters_skill_subtree(self) -> None:
+        branch = {
+            "commit": {
+                "sha": "commit123",
+                "commit": {"tree": {"sha": "tree123"}},
+            }
+        }
+        tree = {
+            "truncated": False,
+            "tree": [
+                {
+                    "path": "skills/maintain-project-memory/SKILL.md",
+                    "type": "blob",
+                    "sha": "blob-skill",
+                },
+                {
+                    "path": "skills/maintain-project-memory/scripts/__pycache__/x.pyc",
+                    "type": "blob",
+                    "sha": "blob-cache",
+                },
+                {
+                    "path": "README.md",
+                    "type": "blob",
+                    "sha": "blob-readme",
+                },
+            ],
+        }
+        with mock.patch.object(MODULE, "_request_json", side_effect=[branch, tree]):
+            commit, files = MODULE.canonical_blob_map(timeout=1.0)
+        self.assertEqual(commit, "commit123")
+        self.assertEqual(files, {"SKILL.md": "blob-skill"})
 
 
 if __name__ == "__main__":
