@@ -35,6 +35,8 @@ CLAIM_KEY_PATTERN = r"[a-z0-9_-]+(?:\.[a-z0-9_-]+)+"
 EXPECTED_PROTOCOL = "maintain-project-memory/v2"
 EXPECTED_SCHEMA = "project-memory/v1"
 EXPECTED_MEMORY_ROOT = "docs/project-memory"
+ISO_DATE_PATTERN = r"\b\d{4}-\d{2}-\d{2}\b"
+STATUS_HISTORY_TITLE_HINTS = ("checkpoint", "audit", "correction")
 SKIP_SCAN_DIRS = {
     ".git",
     ".hg",
@@ -109,6 +111,64 @@ def _is_semantically_empty_handoff(text: str) -> bool:
     return not lines or lines == ["No active handoff."]
 
 
+def _h2_sections(text: str) -> list[tuple[str, str]]:
+    matches = list(re.finditer(r"^##\s+(.+?)\s*$", text, re.MULTILINE))
+    sections: list[tuple[str, str]] = []
+    for index, match in enumerate(matches):
+        body_start = match.end()
+        body_end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        sections.append((match.group(1).strip(), text[body_start:body_end]))
+    return sections
+
+
+def _status_history_signal(status_text: str, session_log_text: str) -> tuple[str, int, str]:
+    """Detect strong evidence that STATUS has accumulated historical ledger sections.
+
+    This detector is intentionally conservative. It flags explicit date-headed sections,
+    or two or more dated trailing sections whose headings look like successive
+    checkpoint/audit/correction records. It never mutates either file and date overlap
+    with SESSION_LOG is only a review hint, not proof of semantic duplication.
+    """
+
+    sections = _h2_sections(status_text)
+    verification_index = next(
+        (index for index, (title, _body) in enumerate(sections) if title.casefold() == "verification"),
+        None,
+    )
+
+    candidates: list[tuple[set[str], bool]] = []
+    for index, (title, body) in enumerate(sections):
+        title_folded = title.casefold()
+        section_text = f"{title}\n{body}"
+        dates = set(re.findall(ISO_DATE_PATTERN, section_text))
+        explicit_dated_heading = bool(re.match(r"^\d{4}-\d{2}-\d{2}\b", title))
+        trailing = verification_index is not None and index > verification_index
+        hinted_title = title_folded.startswith("latest ") or any(
+            hint in title_folded for hint in STATUS_HISTORY_TITLE_HINTS
+        )
+        if explicit_dated_heading or (trailing and hinted_title and dates):
+            candidates.append((dates, explicit_dated_heading))
+
+    if not candidates:
+        return ("clean", 0, "none")
+
+    if not any(explicit for _dates, explicit in candidates) and len(candidates) < 2:
+        return ("clean", 0, "none")
+
+    candidate_dates = set().union(*(dates for dates, _explicit in candidates))
+    session_dates = set(re.findall(ISO_DATE_PATTERN, session_log_text))
+    if not candidate_dates:
+        overlap = "unknown"
+    elif candidate_dates <= session_dates:
+        overlap = "full"
+    elif candidate_dates & session_dates:
+        overlap = "partial"
+    else:
+        overlap = "none"
+
+    return ("likely-accumulation", len(candidates), overlap)
+
+
 def adoption_report(project_root: Path) -> list[str]:
     project_root = project_root.resolve()
     agents = project_root / "AGENTS.md"
@@ -133,6 +193,15 @@ def adoption_report(project_root: Path) -> list[str]:
             else "active-or-legacy"
         )
 
+    status = project_root / EXPECTED_MEMORY_ROOT / "STATUS.md"
+    session_log = project_root / EXPECTED_MEMORY_ROOT / "SESSION_LOG.md"
+    status_text = status.read_text(encoding="utf-8") if status.exists() else ""
+    session_log_text = session_log.read_text(encoding="utf-8") if session_log.exists() else ""
+    status_history, status_history_count, session_overlap = _status_history_signal(
+        status_text,
+        session_log_text,
+    )
+
     git = _git_identity(project_root)
     if git["status"] == "git":
         vcs = f"git branch={git['branch']} head={git['head']} dirty={git['dirty']}"
@@ -146,6 +215,11 @@ def adoption_report(project_root: Path) -> list[str]:
         f"ADOPTION canonical_root={memory_root}",
         f"ADOPTION vcs={vcs}",
         f"ADOPTION handoff={handoff_state}",
+        (
+            "ADOPTION status_history="
+            f"{status_history} count={status_history_count} "
+            f"session_log_date_overlap={session_overlap}"
+        ),
         f"ADOPTION nested_memory_roots={len(nested)}",
     ]
     lines.extend(f"ADOPTION nested_memory_root={path}" for path in nested)
@@ -178,13 +252,42 @@ def audit(project_root: Path, stale_days: int, adoption: bool = False) -> list[s
                 break
 
         dated_sections = re.findall(r"^##\s+\d{4}-\d{2}-\d{2}\b", text, re.MULTILINE)
-        if filename in {"STATUS.md", "HANDOFF.md"} and dated_sections:
+        if filename == "HANDOFF.md" and dated_sections:
             findings.append(
                 f"WARN {filename}: contains {len(dated_sections)} dated section(s); "
                 "keep current/active state replaceable and move history to SESSION_LOG.md"
             )
 
         if filename == "STATUS.md":
+            session_log = memory_root / "SESSION_LOG.md"
+            session_log_text = (
+                session_log.read_text(encoding="utf-8") if session_log.exists() else ""
+            )
+            history_state, history_count, session_overlap = _status_history_signal(
+                text,
+                session_log_text,
+            )
+            if history_state == "likely-accumulation":
+                if session_overlap == "full":
+                    guidance = (
+                        "matching dates also occur in SESSION_LOG.md; review for duplicate "
+                        "ownership before removing historical blocks from STATUS.md"
+                    )
+                elif session_overlap == "partial":
+                    guidance = (
+                        "some matching dates occur in SESSION_LOG.md; compare each candidate "
+                        "before moving or removing history"
+                    )
+                else:
+                    guidance = (
+                        "compare candidates with SESSION_LOG.md before moving or removing history"
+                    )
+                findings.append(
+                    "WARN STATUS.md: likely historical accumulation in "
+                    f"{history_count} section(s); session-log date overlap={session_overlap}; "
+                    f"{guidance}"
+                )
+
             for pattern in PREDICTED_CHECK_SUCCESS:
                 if re.search(pattern, text, re.IGNORECASE):
                     findings.append(
