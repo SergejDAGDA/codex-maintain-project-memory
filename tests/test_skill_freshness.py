@@ -1,7 +1,9 @@
 import importlib.util
+import json
 from pathlib import Path
 import tempfile
 import unittest
+import urllib.error
 from unittest import mock
 
 
@@ -29,6 +31,11 @@ class SkillFreshnessTests(unittest.TestCase):
             (cache / "x.pyc").write_bytes(b"cache")
             result = MODULE.local_blob_map(root)
             self.assertEqual(set(result), {"SKILL.md"})
+
+    def test_payload_digest_is_stable_for_map_order(self) -> None:
+        first = {"b": "2", "a": "1"}
+        second = {"a": "1", "b": "2"}
+        self.assertEqual(MODULE.payload_digest(first), MODULE.payload_digest(second))
 
     def test_compare_blob_maps_reports_all_difference_types(self) -> None:
         local = {"same": "1", "changed": "old", "extra": "x"}
@@ -73,6 +80,106 @@ class SkillFreshnessTests(unittest.TestCase):
             commit, files = MODULE.canonical_blob_map(timeout=1.0)
         self.assertEqual(commit, "commit123")
         self.assertEqual(files, {"SKILL.md": "blob-skill"})
+
+    def _write_receipt(self, root: Path, receipt_path: Path, commit: str) -> None:
+        blobs = MODULE.local_blob_map(root)
+        receipt_path.write_text(
+            json.dumps(
+                {
+                    "schema": MODULE.PROVENANCE_SCHEMA,
+                    "canonical_repository": f"https://github.com/{MODULE.CANONICAL_REPOSITORY}",
+                    "canonical_branch": MODULE.CANONICAL_BRANCH,
+                    "canonical_commit": commit,
+                    "payload_digest": MODULE.payload_digest(blobs),
+                    "recorded_at_utc": "2026-10-04T12:00:00Z",
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    def test_offline_receipt_with_expected_commit_is_write_eligible(self) -> None:
+        commit = "a" * 40
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            root.mkdir()
+            (root / "SKILL.md").write_text("hello\n", encoding="utf-8")
+            receipt = Path(tmp) / "receipt.json"
+            self._write_receipt(root, receipt, commit)
+
+            result = MODULE.local_provenance_result(
+                root,
+                receipt,
+                commit,
+                urllib.error.URLError("blocked"),
+            )
+
+        self.assertEqual(result["status"], "verified-local")
+        self.assertTrue(result["provenance_payload_match"])
+        self.assertTrue(result["expected_commit_match"])
+        self.assertTrue(result["write_eligible"])
+        self.assertEqual(result["canonical_currentness"], "unverified-offline")
+
+    def test_offline_receipt_without_expected_commit_is_read_only(self) -> None:
+        commit = "b" * 40
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            root.mkdir()
+            (root / "SKILL.md").write_text("hello\n", encoding="utf-8")
+            receipt = Path(tmp) / "receipt.json"
+            self._write_receipt(root, receipt, commit)
+
+            result = MODULE.local_provenance_result(
+                root,
+                receipt,
+                None,
+                urllib.error.URLError("blocked"),
+            )
+
+        self.assertEqual(result["status"], "verified-local")
+        self.assertIsNone(result["expected_commit_match"])
+        self.assertFalse(result["write_eligible"])
+
+    def test_offline_receipt_detects_payload_change(self) -> None:
+        commit = "c" * 40
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            root.mkdir()
+            target = root / "SKILL.md"
+            target.write_text("hello\n", encoding="utf-8")
+            receipt = Path(tmp) / "receipt.json"
+            self._write_receipt(root, receipt, commit)
+            target.write_text("changed\n", encoding="utf-8")
+
+            result = MODULE.local_provenance_result(
+                root,
+                receipt,
+                commit,
+                urllib.error.URLError("blocked"),
+            )
+
+        self.assertEqual(result["status"], "different")
+        self.assertFalse(result["provenance_payload_match"])
+        self.assertFalse(result["write_eligible"])
+
+    def test_result_payload_falls_back_to_receipt_when_online_check_is_blocked(self) -> None:
+        commit = "d" * 40
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            root.mkdir()
+            (root / "SKILL.md").write_text("hello\n", encoding="utf-8")
+            receipt = Path(tmp) / "receipt.json"
+            self._write_receipt(root, receipt, commit)
+
+            with mock.patch.object(
+                MODULE,
+                "online_result",
+                side_effect=urllib.error.URLError("blocked"),
+            ):
+                result = MODULE.result_payload(root, 1.0, receipt, commit)
+
+        self.assertEqual(result["status"], "verified-local")
+        self.assertEqual(result["verification_scope"], "recorded-install")
+        self.assertTrue(result["write_eligible"])
 
 
 if __name__ == "__main__":
