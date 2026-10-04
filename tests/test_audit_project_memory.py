@@ -118,6 +118,45 @@ class AuditProjectMemoryTests(unittest.TestCase):
         self.assertIn("ADOPTION vcs=unavailable", joined)
         self.assertIn("ADOPTION handoff=empty", joined)
 
+    def assert_handoff_state(self, content: str, expected: str) -> None:
+        root = self.make_project()
+        handoff = root / "docs" / "project-memory" / "HANDOFF.md"
+        handoff.write_text(content, encoding="utf-8")
+
+        report = AUDIT.adoption_report(root)
+
+        self.assertIn(f"ADOPTION handoff={expected}", report)
+
+    def test_heading_only_handoff_is_empty(self) -> None:
+        self.assert_handoff_state("# Handoff\n", "empty")
+
+    def test_heading_and_blank_lines_handoff_is_empty(self) -> None:
+        self.assert_handoff_state("# Handoff\n\n  \n\t\n", "empty")
+
+    def test_explicit_no_active_handoff_is_empty(self) -> None:
+        self.assert_handoff_state("# Handoff\n\nNo active handoff.\n", "empty")
+
+    def test_comment_only_handoff_is_empty(self) -> None:
+        self.assert_handoff_state("# Handoff\n\n<!-- template note -->\n", "empty")
+
+    def test_substantive_unfinished_handoff_is_active_or_legacy(self) -> None:
+        self.assert_handoff_state(
+            "# Handoff\n\n## Next step\nFinish the adoption audit.\n",
+            "active-or-legacy",
+        )
+
+    def test_legacy_handoff_with_real_content_is_active_or_legacy(self) -> None:
+        self.assert_handoff_state(
+            "# Handoff\n\nContinue from the unresolved ownership decision.\n",
+            "active-or-legacy",
+        )
+
+    def test_no_active_phrase_inside_real_content_is_active_or_legacy(self) -> None:
+        self.assert_handoff_state(
+            "# Handoff\n\nThe phrase No active handoff. appears in this note.\n",
+            "active-or-legacy",
+        )
+
     def test_adoption_scan_finds_nested_memory_root(self) -> None:
         root = self.make_project()
         nested = root / "staging" / "docs" / "project-memory"
