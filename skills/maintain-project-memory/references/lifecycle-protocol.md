@@ -8,9 +8,13 @@ Before relying on current-canonical `maintain-project-memory` behavior, read `re
 
 This check is separate from project protocol/schema markers. A project can correctly declare `maintain-project-memory/v2` while the installed skill implementation is older or locally modified.
 
-- `current`: proceed and report the verified canonical commit when it matters to the task.
-- `different`: stop before project-memory mutation and update/reinstall the skill before continuing with current-contract writes or migration.
-- `unverified`: a read-only Audit may continue only with an explicit freshness caveat; Bootstrap, migration writes, Checkpoint, and Handoff require either successful canonical verification or explicit user acceptance of the unverified state.
+- `current`: proceed; live GitHub comparison established that the installed payload matches canonical `main`.
+- `verified-local` with `WRITE_ELIGIBLE yes`: proceed under the narrower offline boundary; the installed payload matches a recorded user-confirmed installation and the trusted expected commit supplied by the current task/user, but present-time GitHub `main` currentness remains unverified offline.
+- `verified-local` with `WRITE_ELIGIBLE no`: read-only work may continue, but current-contract writes require a trusted expected commit or explicit user acceptance of the last-known install boundary.
+- `different`: stop before project-memory mutation and update/reinstall or re-establish install provenance before continuing.
+- `unverified`: a read-only Audit may continue only with an explicit freshness caveat; Bootstrap, migration writes, Checkpoint, and Handoff require either successful verification or explicit user acceptance of the unverified state.
+
+In a network-restricted environment, a user-confirmed install may record an external provenance receipt with `scripts/record_skill_provenance.py --canonical-commit <sha>`. The receipt is not a substitute for live GitHub currentness; it proves only that the installed payload is unchanged since that confirmed installation and associates it with the trusted commit supplied at recording time.
 
 Do not auto-update the installed skill or edit a Codex cache as part of this lifecycle. Skill installation/update is a separate user-authorized action.
 
