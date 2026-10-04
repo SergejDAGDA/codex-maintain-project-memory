@@ -101,6 +101,14 @@ def _nested_memory_roots(project_root: Path) -> list[Path]:
     return sorted(set(found))
 
 
+def _is_semantically_empty_handoff(text: str) -> bool:
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    if lines and lines[0].casefold() == "# handoff":
+        lines = lines[1:]
+    return not lines or lines == ["No active handoff."]
+
+
 def adoption_report(project_root: Path) -> list[str]:
     project_root = project_root.resolve()
     agents = project_root / "AGENTS.md"
@@ -119,7 +127,11 @@ def adoption_report(project_root: Path) -> list[str]:
         handoff_state = "missing"
     else:
         text = handoff.read_text(encoding="utf-8")
-        handoff_state = "empty" if "No active handoff." in text else "active-or-legacy"
+        handoff_state = (
+            "empty"
+            if _is_semantically_empty_handoff(text)
+            else "active-or-legacy"
+        )
 
     git = _git_identity(project_root)
     if git["status"] == "git":
