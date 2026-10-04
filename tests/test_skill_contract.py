@@ -29,6 +29,23 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("at `docs/project-memory`", lifecycle)
         self.assertIn("do not claim protocol v2 is current merely by changing the marker value", lifecycle)
 
+    def test_canonical_skill_freshness_gate_is_explicit(self) -> None:
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        freshness = self.read("references/skill-freshness.md")
+        interface = self.read("agents/openai.yaml")
+        self.assertIn("## Canonical skill freshness gate", lifecycle)
+        self.assertIn("scripts/check_skill_freshness.py", lifecycle)
+        self.assertIn("canonical GitHub `main`", freshness)
+        self.assertIn("`current`", freshness)
+        self.assertIn("`different`", freshness)
+        self.assertIn("`unverified`", freshness)
+        self.assertIn("verify installed skill freshness against canonical main", interface)
+
+    def test_skill_freshness_is_distinct_from_project_protocol(self) -> None:
+        freshness = self.read("references/skill-freshness.md")
+        self.assertIn("separate from the project-local protocol marker", freshness)
+        self.assertIn("Do not substitute the project protocol marker for this check", freshness)
+
     def test_session_start_freshness_is_protocol_not_new_operation(self) -> None:
         skill = self.read("SKILL.md")
         lifecycle = self.read("references/lifecycle-protocol.md")
