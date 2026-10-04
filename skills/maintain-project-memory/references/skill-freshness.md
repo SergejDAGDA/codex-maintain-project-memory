@@ -13,11 +13,13 @@ The canonical repository commit identifies the current skill implementation. Thi
 
 ## Freshness check
 
-Before an Audit, adoption/migration review, Bootstrap, Checkpoint, or Handoff that claims to use the current canonical skill contract, resolve the installed skill directory and run:
+Before an Audit, adoption/migration review, Bootstrap, Checkpoint, or Handoff that claims to use the current canonical skill contract, resolve the installed skill directory and run the checker with the available Python interpreter:
 
 ```text
-<skill-directory>/scripts/check_skill_freshness.py
+python <skill-directory>/scripts/check_skill_freshness.py
 ```
+
+On systems where the interpreter command is `python3`, use that instead.
 
 The checker compares the complete installed `skills/maintain-project-memory` payload with the skill subtree at canonical GitHub `main` using Git blob identities. It does not rely on a local `.git` directory, installer metadata, or protocol markers.
 
