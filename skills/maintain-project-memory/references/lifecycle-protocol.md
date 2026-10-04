@@ -2,6 +2,18 @@
 
 This reference defines the project-local lifecycle contract for `maintain-project-memory` protocol v2. It supplements the file semantics in `SKILL.md`; it does not add a fifth durable operation.
 
+## Canonical skill freshness gate
+
+Before relying on current-canonical `maintain-project-memory` behavior, read `references/skill-freshness.md` and verify the installed skill payload with `scripts/check_skill_freshness.py`.
+
+This check is separate from project protocol/schema markers. A project can correctly declare `maintain-project-memory/v2` while the installed skill implementation is older or locally modified.
+
+- `current`: proceed and report the verified canonical commit when it matters to the task.
+- `different`: stop before project-memory mutation and update/reinstall the skill before continuing with current-contract writes or migration.
+- `unverified`: a read-only Audit may continue only with an explicit freshness caveat; Bootstrap, migration writes, Checkpoint, and Handoff require either successful canonical verification or explicit user acceptance of the unverified state.
+
+Do not auto-update the installed skill or edit a Codex cache as part of this lifecycle. Skill installation/update is a separate user-authorized action.
+
 ## Protocol markers
 
 Canonical project-local guidance uses these markers:
@@ -31,12 +43,13 @@ The goal is not to force every task through a memory write. The goal is to estab
 
 Before substantial work in a project that uses project memory:
 
-1. Read `AGENTS.md`, `PROJECT.md`, `STATUS.md`, `DECISIONS.md`, and active `HANDOFF.md`.
-2. Verify the actual project root. Treat `.git` as evidence only after a real VCS command confirms a repository.
-3. Capture current repository identity when available: branch, HEAD, and whether the working tree is dirty. Git is optional.
-4. Compare `STATUS.md` and active `HANDOFF.md` with task-relevant implementation/runtime evidence.
-5. Check protocol/schema markers and the declared canonical project-memory root.
-6. If current memory is materially stale, conflicting, or from an older/unmarked protocol, treat it as context rather than current authority and run a bounded read-only Audit before relying on it.
+1. Complete the canonical skill freshness gate above when the task claims current-canonical behavior.
+2. Read `AGENTS.md`, `PROJECT.md`, `STATUS.md`, `DECISIONS.md`, and active `HANDOFF.md`.
+3. Verify the actual project root. Treat `.git` as evidence only after a real VCS command confirms a repository.
+4. Capture current repository identity when available: branch, HEAD, and whether the working tree is dirty. Git is optional.
+5. Compare `STATUS.md` and active `HANDOFF.md` with task-relevant implementation/runtime evidence.
+6. Check protocol/schema markers and the declared canonical project-memory root.
+7. If current memory is materially stale, conflicting, or from an older/unmarked protocol, treat it as context rather than current authority and run a bounded read-only Audit before relying on it.
 
 Do not require `SESSION_LOG.md` on every start. Read recent relevant checkpoints when the current snapshot, decision index, or handoff is insufficient to explain the present state.
 
