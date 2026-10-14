@@ -91,6 +91,28 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("other workflows may read them as evidence and report staleness", agents)
         self.assertIn("should not opportunistically rewrite them", agents)
 
+    def test_local_git_checkpoint_policy_is_project_scoped_and_safe(self) -> None:
+        guide = self.read("references/local-git-checkpoints.md")
+        agents = self.read("assets/templates/AGENTS.memory.fragment.md")
+        skill = self.read("SKILL.md")
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        policy = self.read("references/update-policy.md")
+        self.assertIn("Local Git commit policy: `auto`", agents)
+        for mode in ("auto", "ask", "off"):
+            self.assertIn(f"`{mode}`", guide)
+        for phrase in (
+            "pre-existing index", "git diff --cached --quiet",
+            "git add -- <file1> ...", "git diff --cached --check",
+            "git rev-parse HEAD", "git show --stat --oneline HEAD",
+            "git init", "push", "read-only",
+        ):
+            self.assertIn(phrase, guide)
+        self.assertIn("effective mode is `ask`", guide)
+        self.assertIn("references/local-git-checkpoints.md", skill)
+        self.assertIn("references/local-git-checkpoints.md", lifecycle)
+        self.assertIn("independent", policy)
+        self.assertIn("0.1.3", self.read("VERSION").strip())
+
     def test_git_is_optional_and_locking_is_not_required(self) -> None:
         lifecycle = self.read("references/lifecycle-protocol.md")
         self.assertIn("Git is optional", lifecycle)

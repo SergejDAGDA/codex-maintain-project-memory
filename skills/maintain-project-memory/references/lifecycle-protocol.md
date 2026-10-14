@@ -83,6 +83,19 @@ When Bootstrap enters an existing project that already has some or all project-m
 
 Use Audit as the read-only adoption report. A separate migration operation is not required.
 
+## Local Git completion routing
+
+After a verified, substantial write-capable change, route source/product
+documentation maintenance to its existing owner, then perform the memory
+Checkpoint and finally the bounded native local Git commit **only** when
+`Local Git commit policy` authorizes it. Read
+`references/local-git-checkpoints.md` and use the guards there. This
+completion rule is distinct from `Memory update policy`. No commit for
+read-only tasks, unfinished work, or explicit no-commit instructions. If
+Git or user authorization is absent, document the skipped commit without
+turning the memory lifecycle into a failure. Do not turn local Git history
+into release, deployment or runtime authority.
+
 ## Checkpoint triggers
 
 A Checkpoint is appropriate after a meaningful verified boundary, including:
