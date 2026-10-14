@@ -177,6 +177,13 @@ def adoption_report(project_root: Path) -> list[str]:
     protocol_values = _marker_values(agents_text, "Project memory protocol")
     schema_values = _marker_values(agents_text, "Project memory schema")
     root_values = _marker_values(agents_text, "Canonical project-memory root")
+    git_commit_values = _marker_values(agents_text, "Local Git commit policy")
+    if len(git_commit_values) == 1 and git_commit_values[0] in {"auto", "ask", "off"}:
+        local_git_policy = git_commit_values[0]
+    elif not git_commit_values:
+        local_git_policy = "ask (unset)"
+    else:
+        local_git_policy = "ask (invalid-or-conflicting)"
 
     protocol = protocol_values[0] if len(protocol_values) == 1 else "legacy/unversioned"
     schema = schema_values[0] if len(schema_values) == 1 else "legacy/unversioned"
@@ -213,6 +220,7 @@ def adoption_report(project_root: Path) -> list[str]:
         f"ADOPTION protocol={protocol}",
         f"ADOPTION schema={schema}",
         f"ADOPTION canonical_root={memory_root}",
+        f"ADOPTION local_git_commit_policy={local_git_policy}",
         f"ADOPTION vcs={vcs}",
         f"ADOPTION handoff={handoff_state}",
         (
@@ -367,6 +375,14 @@ def audit(project_root: Path, stale_days: int, adoption: bool = False) -> list[s
             findings.append("ERROR AGENTS.md: missing canonical Memory update policy")
         elif len(policies) > 1:
             findings.append("ERROR AGENTS.md: multiple Memory update policies")
+
+        local_git_values = _marker_values(agents_text, "Local Git commit policy")
+        if len(local_git_values) > 1:
+            findings.append("ERROR AGENTS.md: multiple Local Git commit policies")
+        elif local_git_values and local_git_values[0] not in {"auto", "ask", "off"}:
+            findings.append("WARN AGENTS.md: invalid Local Git commit policy; effective ask")
+        # An absent local Git policy is valid for legacy projects: effective ask,
+        # not implicit consent to local commits or a forced protocol migration.
 
         protocols = _marker_values(agents_text, "Project memory protocol")
         if not protocols:

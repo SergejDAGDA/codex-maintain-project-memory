@@ -39,7 +39,7 @@ After a meaningful verified stage:
 - record consequential decisions in `DECISIONS.md`, using `Proposed` or `Unverified` until approval is established;
 - update `HANDOFF.md` only for substantial unfinished work and reset it when that workstream finishes;
 - report every memory file changed;
-- when this verified stage changed project files and the declared Local Git commit policy permits it, synchronize affected product docs and memory first, then make one narrowly scoped **local-only** Git commit via native Git. Never stage unrelated changes. See the installed `maintain-project-memory` skill's `references/local-git-checkpoints.md`.
+- when this verified stage changed project files and the declared Local Git commit policy permits it, synchronize affected product docs (use `project-documentation` if installed and relevant; otherwise update the maintained docs directly) and memory first, then make one narrowly scoped **local-only** Git commit via native Git. Never stage unrelated changes. See the installed `maintain-project-memory` skill's `references/local-git-checkpoints.md`.
 
 Before any Checkpoint or Handoff write, re-read the target memory files and re-check repository identity. If canonical project-memory or repository HEAD changed unexpectedly outside the changes made by this session, load and reconcile the newer state instead of overwriting it from a stale base.
 

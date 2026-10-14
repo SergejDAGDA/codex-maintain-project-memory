@@ -188,6 +188,44 @@ class AuditProjectMemoryTests(unittest.TestCase):
             report,
         )
 
+    def test_local_git_commit_policy_adoption_is_fail_closed(self) -> None:
+        root = self.create_project()
+        agents = root / "AGENTS.md"
+        original = agents.read_text(encoding="utf-8")
+        self.assertIn("ADOPTION local_git_commit_policy=auto", AUDIT.adoption_report(root))
+
+        agents.write_text(
+            original.replace("Local Git commit policy: `auto`\\n", ""),
+            encoding="utf-8",
+        )
+        self.assertIn(
+            "ADOPTION local_git_commit_policy=ask (unset)",
+            AUDIT.adoption_report(root),
+        )
+
+        agents.write_text(
+            original.replace(
+                "Local Git commit policy: `auto`",
+                "Local Git commit policy: `dangerous`",
+            ),
+            encoding="utf-8",
+        )
+        self.assertIn(
+            "ADOPTION local_git_commit_policy=ask (invalid-or-conflicting)",
+            AUDIT.adoption_report(root),
+        )
+        self.assertTrue(
+            any("invalid Local Git commit policy" in x for x in AUDIT.audit(root, 99999))
+        )
+
+        agents.write_text(
+            original + "\\nLocal Git commit policy: `off`\\n",
+            encoding="utf-8",
+        )
+        self.assertTrue(
+            any("multiple Local Git commit policies" in x for x in AUDIT.audit(root, 99999))
+        )
+
     def test_adoption_report_handles_project_without_git(self) -> None:
         root = self.make_project()
         report = AUDIT.adoption_report(root)
