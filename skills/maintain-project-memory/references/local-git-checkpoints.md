@@ -17,12 +17,12 @@ reviewed result after all applicable owners have finished.
 
 The optional `AGENTS.md` declaration has exactly one value:
 
-- `Local Git commit policy: \`auto\``: for **verified, finished, write-capable**
+- ``Local Git commit policy: `auto` ``: for **verified, finished, write-capable**
   stages, perform a narrow local commit without a repeated confirmation,
   subject to all safety gates below.
-- `Local Git commit policy: \`ask\``: list exact candidate paths and request
+- ``Local Git commit policy: `ask` ``: list exact candidate paths and request
   approval before creating each local commit.
-- `Local Git commit policy: \`off\``: never create a local commit through this
+- ``Local Git commit policy: `off` ``: never create a local commit through this
   lifecycle.
 
 A new project that explicitly adopts the bundled project-memory template
