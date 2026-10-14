@@ -16,7 +16,8 @@ A portable Codex skill for initializing, updating, auditing, adopting, and handi
 - distinguishes the original baseline from later approved project evolution;
 - detects legacy/unversioned project-memory protocols and nested memory copies;
 - uses optimistic revalidation before Checkpoint/Handoff writes to avoid stale-base overwrites;
-- uses code-graph tools when available and falls back to focused search when they are not.
+- uses code-graph tools when available and falls back to focused search when they are not;
+- coordinates safe **local-only Git commits** after finished, verified project stages, under an independent project-local policy; remote publication remains a separate authorization.
 
 The core workflow has no required MCP server, connector, external service, or companion skill.
 
@@ -43,16 +44,42 @@ Protocol v2 adds:
 
 It does **not** change the core semantics: `STATUS.md` stays a replaceable current snapshot, `SESSION_LOG.md` stays append-only history, and `HANDOFF.md` stays active unfinished-work context only.
 
+## Local Git checkpoint policy
+
+For **new projects** that adopt the bundled `AGENTS.md` memory fragment,
+`Local Git commit policy: \`auto\`` permits a narrow local commit after
+a substantial, verified, completed change. The task agent updates affected
+project knowledge and factual project memory first, stages only reviewed
+task-owned files, and verifies the resulting Git commit. It must not
+accidentally capture unrelated untracked or staged work.
+
+In **existing projects** without an explicit local Git policy, effective
+mode is `ask`; adopting `auto` requires a reviewed project-level decision.
+Available choices are `auto`, `ask`, and `off`. A read-only/no-commit
+instruction overrides all of them. Git remains optional and `git init`
+requires separate authorization. No `push`, tag, PR, release, or deployment
+is implied by a local commit.
+
+The exact safe native Git workflow, staging guards and revision semantics
+are in `references/local-git-checkpoints.md`. This does not promise
+automatic invocation in sessions that ignore the repository's `AGENTS.md`.
+
+**Installable skill version: 0.1.3.** The installed
+`skills/maintain-project-memory/VERSION` marker is independent of the
+project-memory protocol/schema markers.
+
 ## Repository layout
 
 ```text
 skills/
 └── maintain-project-memory/
     ├── SKILL.md
+    ├── VERSION
     ├── agents/openai.yaml
     ├── assets/templates/
     ├── references/
     │   ├── lifecycle-protocol.md
+    │   ├── local-git-checkpoints.md
     │   └── update-policy.md
     └── scripts/
         ├── audit_memory_proposal.py

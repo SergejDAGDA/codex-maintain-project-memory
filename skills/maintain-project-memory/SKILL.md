@@ -14,7 +14,12 @@ Keep durable project context small, evidence-based, current, and portable. Separ
 - **Handoff**: preserve an unfinished workstream for another session or agent.
 - **Audit**: find stale, conflicting, duplicated, unverifiable, or legacy/unversioned memory.
 
-Session-start freshness is a read-only protocol, not a fifth operation. When starting or resuming substantial work, read `references/lifecycle-protocol.md` and perform the bounded preflight before relying on project memory. Use `scripts/memory_snapshot.py <project-root>` when a deterministic memory/VCS fingerprint materially helps startup or pre-write revalidation.
+Session-start freshness is a read-only protocol, not a fifth operation. After a
+substantial verified project change, the Checkpoint lifecycle also coordinates a
+**local Git checkpoint** under the separate `Local Git commit policy` in
+`AGENTS.md`. The actual commit uses native Git and is not a fifth memory
+operation or permission to publish remotely. Read
+`references/local-git-checkpoints.md` before any automatic local commit. When starting or resuming substantial work, read `references/lifecycle-protocol.md` and perform the bounded preflight before relying on project memory. Use `scripts/memory_snapshot.py <project-root>` when a deterministic memory/VCS fingerprint materially helps startup or pre-write revalidation.
 
 Use `scripts/init_project_memory.py <project-root>` to copy missing templates. It does not overwrite existing files unless `--overwrite` is explicitly passed.
 
@@ -149,7 +154,7 @@ Keep machine-specific absolute paths out of `AGENTS.md` unless the path is an in
 8. Fill documents with concise statements and evidence pointers. Preserve every canonical heading from the templates exactly; add subsections below them instead of renaming them.
 9. Label uncertain material as `Proposed`, `Assumption`, `Unverified`, or `Conflict`.
 10. Present material conflicts and decisions for approval.
-11. Merge the canonical project-memory protocol into `AGENTS.md` without removing project-specific guidance. New/adopted protocol-v2 projects use `Project memory protocol: maintain-project-memory/v2`, `Project memory schema: project-memory/v1`, and `Canonical project-memory root: docs/project-memory`.
+11. Merge the canonical project-memory protocol into `AGENTS.md` without removing project-specific guidance. New/adopted protocol-v2 projects use `Project memory protocol: maintain-project-memory/v2`, `Project memory schema: project-memory/v1`, and `Canonical project-memory root: docs/project-memory`. In a **new** project, include `Local Git commit policy: \`auto\`` from the canonical template when the user adopts that project workflow; explain that this grants scoped local commits only. In an existing project, do not silently add or enable an absent policy: show the proposed policy change for approval (default effective behavior is `ask` until then).
 12. Resolve the directory containing this `SKILL.md`, then run `<skill-directory>/scripts/audit_project_memory.py <project-root>`. The audit script belongs to the installed skill and is not expected to exist in the target project. Review all findings and the resulting diff before completion.
 
 Never replace an existing `AGENTS.md` wholesale. Merge only the required memory protocol and preserve project-specific instructions. Do not automatically rewrite existing `STATUS.md`, `HANDOFF.md`, `SESSION_LOG.md`, or decision history merely because the local protocol is older; adoption must preserve history and propose the smallest reviewed migration.
@@ -212,6 +217,12 @@ Before any Checkpoint write, perform optimistic revalidation as defined in `refe
 5. Update stable `PROJECT.md` content only when the underlying project truth changed.
 6. Clear resolved work from `HANDOFF.md`; reset it to the empty template when no substantial unfinished work remains.
 7. Report which memory files changed and why.
+8. For a material **write-capable** completed stage, coordinate the native local
+   Git checkpoint **after** affected product documentation and project-memory
+   updates, according to `references/local-git-checkpoints.md`. Apply the
+   independent project-local policy. An Audit, a read-only task, or an explicit
+   no-commit instruction must never create a commit. A completed Checkpoint
+   without Git remains valid; report why local versioning did not occur.
 
 When identity distinctions affect truth, keep repository HEAD, implementation/source baseline, released/deployed source revision, artifact/build identity, runtime identity, and documentation/project-memory revision separate. A docs-only or memory-only commit may advance repository HEAD without changing implementation or deployed identity. Do not write one ambiguous `current revision` claim that collapses materially different identities.
 
@@ -228,6 +239,18 @@ Put information in the narrowest durable layer:
 A source location is not a decision. A value already authoritative in config is normally a project fact, not a new decision entry. A baseline requirement implemented as designed is not an evolution.
 
 During a corrective audit, preserve existing decision entries by default. Do not delete, collapse, or rewrite approved history merely to make it shorter. Remove or supersede an entry only when the user explicitly approves that history change and the proposed diff explains why each affected entry is obsolete, duplicated, or incorrect.
+
+## Local Git completion boundary
+
+For substantial verified project changes, make local version control part of
+the completion check, not an implicit permission to publish. The source and
+documentation owner must first finish the affected diff and tests; then
+`maintain-project-memory` records the factual Checkpoint; finally the task
+agent performs at most one narrowly scoped local Git commit when permitted.
+See `references/local-git-checkpoints.md` for policy routing and safety
+preconditions. Never confuse the resulting repository HEAD with the
+implementation/deployed baseline in `STATUS.md`; do not create a second
+memory-only commit just to rewrite a SHA after committing.
 
 ## Handoff
 
@@ -300,7 +323,7 @@ Keep these canonical headings unchanged so the structural audit remains determin
 
 ## Apply the update policy
 
-Read `references/update-policy.md` when choosing whether to write automatically or request approval. Default to `approve-decisions` when the project has no explicit policy.
+Read `references/update-policy.md` when choosing whether to write automatically or request approval. The separate `Local Git commit policy` is defined in `references/local-git-checkpoints.md`; memory update policies never grant Git commit, push, release, or deployment permission. Default to `approve-decisions` when the project has no explicit policy.
 
 Ensure `AGENTS.md` contains exactly one explicit `Memory update policy: \`notify\``, `Memory update policy: \`approve-decisions\``, or `Memory update policy: \`strict\`` declaration. If existing rules already map unambiguously to one policy, add the canonical label as a behavior-preserving normalization and disclose it in `Approval effect`. If existing rules are ambiguous or conflicting, track `memory.update_policy` as an unresolved decision instead of guessing.
 
@@ -340,6 +363,9 @@ Before declaring the operation complete:
 - keep repository HEAD, implementation/deployed identity, and documentation/project-memory revision distinct when they materially differ;
 - before Checkpoint/Handoff writes, confirm optimistic revalidation did not reveal unexpected newer memory or repository state;
 - inspect the final diff or list of created files;
+- for a substantial write-capable completed stage, report the local Git commit
+  policy, Git availability, committed SHA (if any), precisely scoped files, or
+  the reason a commit was safely skipped;
 - confirm no existing decision was duplicated and `Next safe step` remains pending;
 - confirm the final snapshot describes post-update reality, preserves approved history, and does not create a same-session handoff;
 - confirm every divergence uses the closed taxonomy and ordinary current-state facts are not presented as divergences;

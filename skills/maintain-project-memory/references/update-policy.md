@@ -1,6 +1,6 @@
 # Update policy
 
-Choose one policy per project and record it in the memory protocol section of `AGENTS.md`.
+Choose one policy per project and record it in the memory protocol section of `AGENTS.md`. This governs **memory file writes only**. Local Git commits use an independent `Local Git commit policy` in `references/local-git-checkpoints.md`; `notify`, `approve-decisions`, and `strict` do not themselves grant permission to commit or publish.
 
 ## `notify`
 
