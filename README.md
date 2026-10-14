@@ -47,7 +47,7 @@ It does **not** change the core semantics: `STATUS.md` stays a replaceable curre
 ## Local Git checkpoint policy
 
 For **new projects** that adopt the bundled `AGENTS.md` memory fragment,
-`Local Git commit policy: \`auto\`` permits a narrow local commit after
+``Local Git commit policy: `auto` `` permits a narrow local commit after
 a substantial, verified, completed change. The task agent updates affected
 project knowledge and factual project memory first, stages only reviewed
 task-owned files, and verifies the resulting Git commit. It must not
