@@ -41,6 +41,11 @@ After a meaningful verified stage:
 - report every memory file changed;
 - when this verified stage changed project files and the declared Local Git commit policy permits it, synchronize affected product docs (use `project-documentation` if installed and relevant; otherwise update the maintained docs directly) and memory first, then make one narrowly scoped **local-only** Git commit via native Git. Never stage unrelated changes. See the installed `maintain-project-memory` skill's `references/local-git-checkpoints.md`.
 
+When this project has an approved **separate deployment** workflow:
+- on "prepare for deployment", use the installed documentation/release workflow as appropriate, then a memory Handoff to freeze the approved source revision/build, preserve explicit data-protection gates, and give a bounded deployment prompt; do not mark the release as deployed;
+- after deployment, when an authorized shared project checkout and a factual deployment receipt are available, use a memory Checkpoint to record the actual deployed identity, verification provenance and pending actions and close the Handoff. Call the documentation owner only if maintained technical docs really changed;
+- on resuming development, compare the project status and deployed-revision evidence before continuing. If a different deployment chat cannot write this canonical root, report synchronization pending; do not invent success from its chat transcript.
+
 Before any Checkpoint or Handoff write, re-read the target memory files and re-check repository identity. If canonical project-memory or repository HEAD changed unexpectedly outside the changes made by this session, load and reconcile the newer state instead of overwriting it from a stale base.
 
 Do not commit after a read-only task, an explicit no-commit instruction, or when
