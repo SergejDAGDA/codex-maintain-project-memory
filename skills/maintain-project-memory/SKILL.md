@@ -224,6 +224,8 @@ Before any Checkpoint write, perform optimistic revalidation as defined in `refe
    no-commit instruction must never create a commit. A completed Checkpoint
    without Git remains valid; report why local versioning did not occur.
 
+**Cross-project deployment receipt Checkpoint (when applicable):** A separately managed Docker/deployment workstream may return a verified operational receipt into this project's **existing** canonical root. After permitted access and optimistic revalidation, record the observed deployed release/source SHA, image identity, environment, verification time/evidence provenance, recovery reference and remaining action in `STATUS.md` and `SESSION_LOG.md` at their natural level of detail. Close the deployment Handoff only after the transfer's completion is evidenced. A receipt supplied by another agent/chat is external evidence until independently checked; preserve that distinction instead of claiming a live-server check was performed locally. If project checkout/access or update policy blocks the write, preserve the pending receipt/target for a later authorized Checkpoint; do not overwrite fresher source or claim synchronized chats.
+
 When identity distinctions affect truth, keep repository HEAD, implementation/source baseline, released/deployed source revision, artifact/build identity, runtime identity, and documentation/project-memory revision separate. A docs-only or memory-only commit may advance repository HEAD without changing implementation or deployed identity. Do not write one ambiguous `current revision` claim that collapses materially different identities.
 
 Do not record hidden reasoning, transient debugging attempts, or facts already represented authoritatively by machine-readable project files.
@@ -253,6 +255,8 @@ implementation/deployed baseline in `STATUS.md`; do not create a second
 memory-only commit just to rewrite a SHA after committing.
 
 ## Handoff
+
+A user-directed transfer of an **approved, verified application release** from a development project into a separate deployment project is substantial unfinished work until the deployment result is known. When asked to "prepare for deployment", perform the project's actual release/documentation checks under their respective owners, freeze the exact approved source/build identity, then prepare the bounded `HANDOFF.md` and a ready-to-use deployment instruction in the response. The handoff should point to existing authoritative source/build docs rather than duplicate their full contents; include the exact repository/revision, target environment when known, source/Compose build inputs, known persistent user-state/no-touch boundaries, migration and restore gates, acceptance checks and explicitly pending deployment status. The deployment operator must independently verify those claims before acting. This Handoff does **not** authorize deployment, publication, GitHub mutation, or server changes.
 
 Write `HANDOFF.md` for substantial unfinished work only. Include:
 
