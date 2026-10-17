@@ -64,7 +64,7 @@ The exact safe native Git workflow, staging guards and revision semantics
 are in `references/local-git-checkpoints.md`. This does not promise
 automatic invocation in sessions that ignore the repository's `AGENTS.md`.
 
-**Installable skill version: 0.1.3.** The installed
+**Installable skill version: 0.1.4.** The installed
 `skills/maintain-project-memory/VERSION` marker is independent of the
 project-memory protocol/schema markers.
 
