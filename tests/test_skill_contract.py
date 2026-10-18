@@ -111,7 +111,7 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("references/local-git-checkpoints.md", skill)
         self.assertIn("references/local-git-checkpoints.md", lifecycle)
         self.assertIn("independent", policy)
-        self.assertIn("0.1.4", self.read("VERSION").strip())
+        self.assertIn("0.1.5", self.read("VERSION").strip())
 
     def test_git_is_optional_and_locking_is_not_required(self) -> None:
         lifecycle = self.read("references/lifecycle-protocol.md")
