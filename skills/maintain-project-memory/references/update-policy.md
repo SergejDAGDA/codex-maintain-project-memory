@@ -28,6 +28,28 @@ Request approval before:
 
 When work should continue without waiting, record the item as `Proposed` and keep existing approved behavior authoritative.
 
+## Factual continuity while an implementation is unfinished
+
+A **Minimum Continuity Record (MCR)** is a short current-state update to
+`STATUS.md`, not a verified completed-work Checkpoint and not an approval
+of implementation decisions. Follow
+`references/lifecycle-protocol.md#minimum-wip-continuity`.
+
+- Under `notify` or `approve-decisions`, factual WIP scope, dirty paths,
+  observed checks/failures, blockers and next action may be recorded without
+  new semantic-decision approval. Inform the user of every change.
+- A request to defer **full documentation, semantic decisions, or a finished
+  checkpoint** does not implicitly defer MCR. But when the user explicitly
+  prohibits **any** memory/tracking writes or intent is unclear, stop before
+  substantial write-capable work and resolve that instruction first.
+- Under `strict`, every proposed MCR write must be shown and approved in
+  advance, with the existing strict diff/revalidation rules. No exception.
+- A read-only task must not write MCR. An explicit `no-commit` remains
+  compatible with a policy-permitted factual MCR record; it never authorizes
+  a local commit.
+- If MCR cannot be safely written, do not silently continue large unfinished
+  edits. A chat summary is not a durable project-file record.
+
 ## `strict`
 
 Prepare and show a proposed diff before changing any memory file. Use for regulated, high-risk, or multi-owner projects.
