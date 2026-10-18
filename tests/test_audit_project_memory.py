@@ -109,6 +109,29 @@ class AuditProjectMemoryTests(unittest.TestCase):
         self.assertIn("WARN STATUS.md: likely historical accumulation in 1 section", joined)
         self.assertIn("WARN HANDOFF.md: contains 1 dated section", joined)
 
+    def test_unfinished_wip_status_is_a_current_snapshot_not_history(self) -> None:
+        root = self.make_project()
+        status = root / "docs" / "project-memory" / "STATUS.md"
+        old = status.read_text(encoding="utf-8")
+        self.assertIn("## In progress\\n\\n- None.", old)
+        wip = (
+            "## In progress\\n\\n"
+            "- Slice: UI authoring WIP; not a completed checkpoint.\\n"
+            "- Pre-commit HEAD: abc123; branch: feat/workbench.\\n"
+            "- Task-owned: frontend/workbench.js (unstaged); tests/test_ui.py (untracked).\\n"
+            "- Pre-existing: frontend/app.js (unstaged, out of scope).\\n"
+            "- Commit readiness: NOT READY.\\n"
+        )
+        status.write_text(
+            old.replace("## In progress\\n\\n- None.", wip),
+            encoding="utf-8",
+        )
+        findings = AUDIT.audit(root, stale_days=99999)
+        self.assertFalse(
+            any("historical accumulation" in item for item in findings),
+            findings,
+        )
+
     def test_current_status_dates_do_not_trigger_history_warning(self) -> None:
         root = self.make_project()
         status = root / "docs" / "project-memory" / "STATUS.md"
