@@ -121,7 +121,7 @@ class SkillContractTests(unittest.TestCase):
         agents = self.read("assets/templates/AGENTS.memory.fragment.md")
         self.assertIn("## Minimum WIP continuity", lifecycle)
         self.assertIn("not a fifth operation", lifecycle)
-        self.assertIn("before material edits", skill)
+        self.assertIn("Before the first material edit", skill)
         for trigger in (
             "Before the first material write",
             "After a meaningful implementation slice",
