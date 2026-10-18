@@ -39,9 +39,13 @@ blocker, pause/handoff, or unfinished-final-report boundaries. Record branch,
 pre-commit HEAD, task-owned vs pre-existing dirty paths, checks/unknowns,
 blockers, next step and commit readiness. No commit or semantic approval follows
 from a WIP record. A request to defer full memory does not waive this minimal
-record under `notify` or `approve-decisions`; `strict` requires a reviewed
-diff for **each** write. If any memory/tracking write is expressly prohibited,
-stop before further substantial edits and ask for an agreed recording plan.
+record under `notify` or `approve-decisions` **only when explicitly
+limited to final semantic documentation/checkpoint**; a broad request such as
+"continue, update memory after completion and ask first" is ambiguous:
+clarify whether the minimal factual WIP update is allowed **before coding**.
+`strict` requires a reviewed diff for **each** write. If any memory/tracking
+write is expressly prohibited, stop before further substantial edits and
+ask for an agreed recording plan.
 Read-only work never writes memory; follow optimistic revalidation.
 
 After a meaningful verified stage:
