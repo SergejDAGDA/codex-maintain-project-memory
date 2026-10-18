@@ -165,6 +165,28 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("A read-only task never writes MCR", skill)
         self.assertIn("WIP recording never authorizes a Git", skill)
 
+    def test_legacy_project_activation_and_broad_deferral_are_fail_closed(self) -> None:
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        policy = self.read("references/update-policy.md")
+        skill = self.read("SKILL.md")
+        agents = self.read("assets/templates/AGENTS.memory.fragment.md")
+        audit = self.read("scripts/audit_project_memory.py")
+        self.assertIn("### Activation in existing projects", lifecycle)
+        self.assertIn("## Minimum WIP continuity", lifecycle)
+        self.assertIn("wip_continuity_routing=declared", lifecycle)
+        self.assertIn("missing-review-required", lifecycle)
+        self.assertIn("Stop ordinary substantial write-capable implementation", lifecycle)
+        self.assertIn("Ambiguous user deferral: classify before edits", lifecycle)
+        self.assertIn("update project memory only when finished", lifecycle)
+        self.assertIn("ask whether that specific record is permitted", lifecycle)
+        self.assertIn("Broad statements", policy)
+        self.assertIn("broad defer-memory requests as ambiguous", self.read("agents/openai.yaml"))
+        self.assertIn("first verify project-local MCR routing", skill)
+        self.assertIn("an old/missing rule requires separately approved", skill)
+        self.assertIn("clarify whether the minimal factual WIP update is allowed", agents)
+        self.assertIn("def _wip_continuity_routing(", audit)
+        self.assertIn("ADOPTION wip_continuity_routing=", audit)
+
     def test_git_is_optional_and_locking_is_not_required(self) -> None:
         lifecycle = self.read("references/lifecycle-protocol.md")
         self.assertIn("Git is optional", lifecycle)
