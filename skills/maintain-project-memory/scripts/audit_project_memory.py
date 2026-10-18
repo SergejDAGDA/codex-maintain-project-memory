@@ -169,6 +169,13 @@ def _status_history_signal(status_text: str, session_log_text: str) -> tuple[str
     return ("likely-accumulation", len(candidates), overlap)
 
 
+def _wip_continuity_routing(agents_text: str) -> str:
+    """Report only an explicit project-local MCR instruction, not runtime execution."""
+    has_route = "Minimum WIP Continuity procedure" in agents_text
+    has_boundary = "stop before further substantial edits" in agents_text
+    return "declared" if has_route and has_boundary else "missing-review-required"
+
+
 def adoption_report(project_root: Path) -> list[str]:
     project_root = project_root.resolve()
     agents = project_root / "AGENTS.md"
@@ -221,6 +228,7 @@ def adoption_report(project_root: Path) -> list[str]:
         f"ADOPTION schema={schema}",
         f"ADOPTION canonical_root={memory_root}",
         f"ADOPTION local_git_commit_policy={local_git_policy}",
+        f"ADOPTION wip_continuity_routing={_wip_continuity_routing(agents_text)}",
         f"ADOPTION vcs={vcs}",
         f"ADOPTION handoff={handoff_state}",
         (
@@ -423,6 +431,11 @@ def audit(project_root: Path, stale_days: int, adoption: bool = False) -> list[s
         findings.append("WARN AGENTS.md: missing project-local memory protocol")
 
     if adoption:
+        if _wip_continuity_routing(agents_text if agents.exists() else "") != "declared":
+            findings.append(
+                "WARN AGENTS.md: WIP continuity routing absent or incomplete; "
+                "review and approve the project-local MCR instruction before substantial edits"
+            )
         for nested in _nested_memory_roots(project_root):
             findings.append(
                 f"WARN nested project-memory root detected: {nested}; classify it as separate or non-canonical"

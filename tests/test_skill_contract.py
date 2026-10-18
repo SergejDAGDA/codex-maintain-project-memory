@@ -111,7 +111,81 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("references/local-git-checkpoints.md", skill)
         self.assertIn("references/local-git-checkpoints.md", lifecycle)
         self.assertIn("independent", policy)
-        self.assertIn("0.1.4", self.read("VERSION").strip())
+        self.assertIn("0.1.5", self.read("VERSION").strip())
+
+    def test_minimum_wip_continuity_boundaries_and_no_new_operation(self) -> None:
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        skill = self.read("SKILL.md")
+        status = self.read("assets/templates/STATUS.md")
+        session_log = self.read("assets/templates/SESSION_LOG.md")
+        agents = self.read("assets/templates/AGENTS.memory.fragment.md")
+        self.assertIn("## Minimum WIP continuity", lifecycle)
+        self.assertIn("not a fifth operation", lifecycle)
+        self.assertIn("Before the first material edit", skill)
+        for trigger in (
+            "Before the first material write",
+            "After a meaningful implementation slice",
+            "On material blocker / cross-component contract mismatch",
+            "Before pause, context transfer, or a final report with material WIP",
+        ):
+            self.assertIn(trigger, lifecycle)
+        for record_field in (
+            "exact observed HEAD",
+            "staged/unstaged/untracked",
+            "unverified areas",
+            "next safe action",
+            "commit readiness: NOT READY",
+        ):
+            self.assertIn(record_field, lifecycle)
+        self.assertIn("Minimum Continuity Record", status)
+        self.assertIn("meaningful WIP boundary", session_log)
+        self.assertIn("strict", agents)
+        self.assertIn("No commit", agents)
+
+    def test_deferred_memory_permissions_and_failure_boundaries(self) -> None:
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        policy = self.read("references/update-policy.md")
+        skill = self.read("SKILL.md")
+        for phrase in (
+            "notify",
+            "approve-decisions",
+            "strict",
+            "Explicit `read-only`",
+            "Explicit `no-commit`",
+            "Explicit prohibition of any tracking-file writes",
+            "optimistic revalidation",
+            "DECISIONS.md",
+            "SESSION_LOG.md",
+        ):
+            self.assertIn(phrase, lifecycle)
+        self.assertIn("obtain approval", lifecycle)
+        self.assertIn("pause substantial write-capable work", lifecycle)
+        self.assertIn("A chat summary is not a durable project-file record", policy)
+        self.assertIn("defer **full semantic", skill)
+        self.assertIn("A read-only task never writes MCR", skill)
+        self.assertIn("WIP recording never authorizes a Git", skill)
+
+    def test_legacy_project_activation_and_broad_deferral_are_fail_closed(self) -> None:
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        policy = self.read("references/update-policy.md")
+        skill = self.read("SKILL.md")
+        agents = self.read("assets/templates/AGENTS.memory.fragment.md")
+        audit = self.read("scripts/audit_project_memory.py")
+        self.assertIn("### Activation in existing projects", lifecycle)
+        self.assertIn("## Minimum WIP continuity", lifecycle)
+        self.assertIn("wip_continuity_routing=declared", lifecycle)
+        self.assertIn("missing-review-required", lifecycle)
+        self.assertIn("Stop ordinary substantial write-capable implementation", lifecycle)
+        self.assertIn("Ambiguous user deferral: classify before edits", lifecycle)
+        self.assertIn("update project memory only when finished", lifecycle)
+        self.assertIn("ask whether that specific record is permitted", lifecycle)
+        self.assertIn("Broad statements", policy)
+        self.assertIn("broad defer-memory requests as ambiguous", self.read("agents/openai.yaml"))
+        self.assertIn("first verify project-local MCR routing", skill)
+        self.assertIn("an old/missing rule requires separately approved", skill)
+        self.assertIn("clarify whether the minimal factual WIP update is allowed", agents)
+        self.assertIn("def _wip_continuity_routing(", audit)
+        self.assertIn("ADOPTION wip_continuity_routing=", audit)
 
     def test_git_is_optional_and_locking_is_not_required(self) -> None:
         lifecycle = self.read("references/lifecycle-protocol.md")

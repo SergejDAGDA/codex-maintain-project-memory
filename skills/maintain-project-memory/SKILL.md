@@ -202,6 +202,40 @@ Treat that file and digest as a sealed approval artifact:
 
 If the displayed response and sealed file differ in any byte, the file is authoritative and the displayed proposal is not approvable.
 
+## Minimum continuity during unfinished work
+
+For substantial **write-capable** implementation that remains unfinished, preserve a
+**Minimum Continuity Record (MCR)** in the existing canonical project memory.
+This is an in-progress factual STATUS update, **not** a fifth operation, an
+approved design decision, a verified completion Checkpoint, or permission to
+commit. Follow `references/lifecycle-protocol.md#minimum-wip-continuity` and
+`references/update-policy.md`.
+
+- In an existing project, first verify project-local MCR routing in the real
+  `AGENTS.md` using the read-only `audit_project_memory.py --adoption`.
+  An upgraded installed skill or old v2 marker alone does not activate routine
+  coding-session continuity; an old/missing rule requires separately approved
+  adoption before substantial ordinary coding.
+- Treat broad requests such as "update memory after completion, with my
+  permission" as ambiguous/no-tracking-write until clarified. Ask whether a
+  minimal factual `STATUS.md` WIP record is permitted before material edits.
+- Before the first material edit, establish a read-only Git/task baseline and
+  ensure the short MCR can be written under the active policy. Record that
+  baseline in `STATUS.md` before proceeding with substantial changes.
+- At a meaningful bounded-slice boundary, material blocker/contract mismatch,
+  planned pause/handoff, or final response with unfinished material changes,
+  refresh the MCR from actual diff/check evidence; do not wait for final tests.
+- Keep `STATUS.md` replaceable and short. Append to `SESSION_LOG.md` only for
+  meaningful transitions; use `HANDOFF.md` only for a real unfinished transfer.
+  Preserve unrelated work and revalidate canonical memory/HEAD before writing.
+- Under `notify` or `approve-decisions`, a request to defer **full semantic
+  documentation or final checkpoint** does not defer this minimal factual
+  status. If any instruction explicitly forbids tracking-file writes, clarify
+  and stop before further substantial edits rather than silently overriding
+  it. Under `strict`, obtain approval of the proposed MCR diff first.
+- A read-only task never writes MCR. WIP recording never authorizes a Git
+  commit, push, deployment, or approval of a scope/architecture decision.
+
 ## Checkpoint
 
 Update memory only after a meaningful verified outcome: a completed feature/bug-fix stage, investigation conclusion, architecture/schema/security/product/data/operational decision, release/deployment/migration boundary, approved change of direction, materially changed next safe action, handoff closure, or durable conflict/risk that must survive the current session. Do not create a checkpoint for trivial formatting, ordinary reading, transient debugging, or an intermediate experiment with no durable effect.

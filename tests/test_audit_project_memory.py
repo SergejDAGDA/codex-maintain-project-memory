@@ -109,6 +109,69 @@ class AuditProjectMemoryTests(unittest.TestCase):
         self.assertIn("WARN STATUS.md: likely historical accumulation in 1 section", joined)
         self.assertIn("WARN HANDOFF.md: contains 1 dated section", joined)
 
+    def test_unfinished_wip_status_is_a_current_snapshot_not_history(self) -> None:
+        root = self.make_project()
+        status = root / "docs" / "project-memory" / "STATUS.md"
+        original = status.read_text(encoding="utf-8")
+        self.assertIn("## In progress\n\n- None.", original)
+        wip = (
+            "## In progress\n\n"
+            "- Project identity: InteractiveInfoMap demo; root: /disposable/map (local-only).\n"
+            "- Bounded slice: UI authoring; observed: form implemented; planned: API integration.\n"
+            "- Branch: feat/workbench; pre-commit HEAD: abc123 (not deployed).\n"
+            "- Task-owned: frontend/workbench.js (unstaged); tests/test_ui.py (untracked).\n"
+            "- Pre-existing/unrelated: frontend/app.js (unstaged); index: none staged.\n"
+            "- Commit readiness: NOT READY (integration tests incomplete).\n"
+            "\n## Blockers and risks\n\n"
+            "- BLOCKER: frontend sends slug string, backend expects numeric ID; decision unresolved.\n"
+            "\n## Next safe step\n\n"
+            "- Align approved API contract before continued integration; do not commit.\n"
+            "\n## Verification\n\n"
+            "- Checks run: python -m unittest test_ui: 2 passed; source-only evidence.\n"
+            "- Not verified: frontend/backend contract, browser and runtime.\n"
+        )
+        start = original.index("## In progress\n\n- None.")
+        end = original.index("<!-- When materially different")
+        status.write_text(original[:start] + wip + "\n" + original[end:], encoding="utf-8")
+        saved = status.read_text(encoding="utf-8")
+        for field in (
+            "Project identity:", "root:", "Bounded slice:", "observed:", "planned:",
+            "pre-commit HEAD:", "Task-owned:", "Pre-existing/unrelated:",
+            "staged", "unstaged", "untracked", "Commit readiness: NOT READY",
+            "BLOCKER:", "decision unresolved", "Next safe step", "Checks run:",
+            "Not verified:",
+        ):
+            self.assertIn(field, saved)
+        findings = AUDIT.audit(root, stale_days=99999)
+        self.assertFalse(any("historical accumulation" in x for x in findings), findings)
+        self.assertFalse(any(x.startswith("ERROR") for x in findings), findings)
+
+    def test_existing_project_without_wip_routing_needs_adoption(self) -> None:
+        root = self.make_project()
+        agents = root / "AGENTS.md"
+        current = agents.read_text(encoding="utf-8")
+        self.assertIn(
+            "ADOPTION wip_continuity_routing=declared",
+            AUDIT.adoption_report(root),
+        )
+        start = current.index(
+            "During substantial unfinished write-capable work, use the installed"
+        )
+        end = current.index("After a meaningful verified stage:", start)
+        agents.write_text(current[:start] + current[end:], encoding="utf-8")
+
+        report = AUDIT.adoption_report(root)
+        self.assertIn(
+            "ADOPTION wip_continuity_routing=missing-review-required",
+            report,
+        )
+        self.assertIn("ADOPTION protocol=maintain-project-memory/v2", report)
+        findings = AUDIT.audit(root, stale_days=99999, adoption=True)
+        self.assertTrue(
+            any("WIP continuity routing absent or incomplete" in x for x in findings),
+            findings,
+        )
+
     def test_current_status_dates_do_not_trigger_history_warning(self) -> None:
         root = self.make_project()
         status = root / "docs" / "project-memory" / "STATUS.md"
