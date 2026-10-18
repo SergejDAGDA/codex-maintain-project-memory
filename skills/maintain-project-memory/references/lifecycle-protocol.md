@@ -38,7 +38,7 @@ Use project memory as an early coordination layer for substantial software proje
 
 - If a substantial new project has no project-memory protocol yet, route through Bootstrap before or alongside the first material implementation stage unless the user explicitly opts out.
 - If an existing project already has project-memory files or memory guidance but lacks current protocol markers, treat it as adoption/migration: perform the read-only adoption review before relying on the old memory as current authority.
-- If the project is already on the current protocol, run the session-start preflight below before material work.
+- If the project is already on the current protocol, run the session-start preflight below before material work. Before substantial **write-capable** work, also verify that its *actual project-local* `AGENTS.md` routes unfinished WIP through Minimum Continuity Record (MCR), not merely that a newer skill is installed.
 - Do not Bootstrap trivial experiments, throwaway snippets, or repositories where durable cross-session coordination is not useful.
 
 The goal is not to force every task through a memory write. The goal is to establish one shared durable project model early enough that later chats and agents do not independently reconstruct project state.
@@ -84,6 +84,46 @@ When Bootstrap enters an existing project that already has some or all project-m
 Use Audit as the read-only adoption report. A separate migration operation is not required.
 
 ## Minimum WIP continuity
+
+### Activation in existing projects
+
+Before **ordinary coding** in an existing memory-enabled project, read its
+actual `AGENTS.md` and run a read-only `audit_project_memory.py
+<project-root> --adoption` when MCR routing has not already been established.
+This reports `ADOPTION wip_continuity_routing=declared` or
+`missing-review-required` based on the project-local instruction text;
+`declared` is **not proof of runtime agent compliance**. Protocol/schema
+markers alone and installation of a new skill do not upgrade existing
+project-local instructions.
+
+When routing is absent/incomplete, propose the smallest project-local
+`AGENTS.md` amendment adding a short pointer to the installed current MCR
+lifecycle, **preserving existing memory policy and unrelated guidance**.
+Obtain the appropriate explicit approval before writing operating rules.
+Do not silently rewrite the old fragment or change protocol/schema markers.
+**Stop ordinary substantial write-capable implementation until the agreed
+project-local adoption is completed**; a read-only assessment may continue.
+When an installed skill is explicitly invoked, it can apply MCR under the
+current project's existing valid permission policy for that bounded task, but
+this does **not** make subsequent ordinary coding sessions adopted or
+guaranteed. A user-approved project-local routing rule is the durable trigger.
+
+#### Ambiguous user deferral: classify before edits
+
+A request such as "continue coding, update project memory only when finished,
+and ask me before doing so" is **ambiguous**, not permission to write MCR.
+Treat "don't update memory", "don't touch STATUS/SESSION_LOG/HANDOFF", "do not
+change tracking files until I approve", and broad equivalents as a
+**no-tracking-write instruction or unresolved prohibition**. Before any
+substantial write-capable step, state that the work requires a minimal factual
+WIP record and ask whether that specific record is permitted. Until clarified,
+**stop rather than silently writing MCR or accumulating unfinished code**.
+When the user explicitly says "defer only the final checkpoint", "do not
+approve or change DECISIONS yet", or "postpone the finished documentation,
+but keep factual WIP status", MCR can proceed subject to the normal
+`notify`/`approve-decisions`/`strict` policy. Explicit read-only or strict
+approval gates still override automatic recording. A no-commit instruction
+is not a prohibition on approved factual status updates.
 
 This is a **factual in-progress sub-step** of the existing Checkpoint/Handoff
 lifecycle, not a fifth operation and **not** a completion checkpoint. Its
@@ -138,10 +178,10 @@ credentials and raw environment values.
 ### Permission and failure boundaries
 
 - `notify` / `approve-decisions`: factual MCR updates are allowed by the
-  existing memory policy. A user request to defer the **complete semantic
-  memory update or finished checkpoint** does not suspend a minimal factual
-  WIP record; tell the user what was recorded. Do not reinterpret an explicit
-  ban on **all** tracking/memory writes as consent.
+  existing memory policy. **Only an explicitly limited deferral** of final
+  semantic documentation/checkpoint leaves MCR permitted. Broad deferrals
+  of "project memory" are ambiguous/no-write until clarified (see above).
+  Tell the user what was recorded; never override a no-tracking-write request.
 - `strict`: show the exact proposed memory diff and obtain approval **before**
   the first MCR write, as required for every memory write. If approval is not
   available, pause substantial write-capable work instead of proceeding with
