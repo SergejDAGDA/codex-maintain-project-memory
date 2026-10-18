@@ -44,6 +44,25 @@ Protocol v2 adds:
 
 It does **not** change the core semantics: `STATUS.md` stays a replaceable current snapshot, `SESSION_LOG.md` stays append-only history, and `HANDOFF.md` stays active unfinished-work context only.
 
+## Minimum unfinished-work continuity (v0.1.5 candidate)
+
+During substantial unfinished write-capable development, the active task keeps a
+short factual WIP record in the **existing** `STATUS.md`: branch/pre-commit
+HEAD, task-owned versus pre-existing dirty paths, implemented versus planned
+scope, actual checks, blockers, next safe action and commit readiness. Record
+the starting baseline before substantial edits and refresh at meaningful
+slice/blocker/pause boundaries. Significant transitions may be appended to
+`SESSION_LOG.md`; routine edits do not generate log entries.
+
+Deferring a full semantic memory update or final Git checkpoint does not
+defer this minimal factual continuity under `notify`/`approve-decisions`.
+`strict` still requires the proposed diff to be approved before every write;
+an explicit no-tracking-write or read-only instruction is never overridden.
+If durable continuity is prohibited during substantial edits, pause and agree
+on a recording policy first. This does not add a Git commit, schema change,
+fifth skill operation or new source of truth. It is a policy contract, not an
+automated guarantee when the agent fails to follow project instructions.
+
 ## Local Git checkpoint policy
 
 For **new projects** that adopt the bundled `AGENTS.md` memory fragment,
