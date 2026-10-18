@@ -157,7 +157,7 @@ ledger, automatic commits, a background service or a new schema marker.
 Maintain a concise WIP note inside existing `STATUS.md` sections:
 `In progress`, `Blockers and risks`, `Next safe step`, and `Verification`.
 
-- bounded task scope and observed implemented-vs-planned state;
+- project root identity (repository name/root, or an explicitly labelled local non-portable path) and bounded task scope and observed implemented-vs-planned state;
 - branch and exact observed HEAD, explicitly labelled **pre-commit**, or
   `VCS unavailable`;
 - affected file paths and staged/unstaged/untracked state, distinguishing
