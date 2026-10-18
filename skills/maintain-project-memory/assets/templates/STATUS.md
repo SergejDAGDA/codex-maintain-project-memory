@@ -12,6 +12,7 @@ Last verified: YYYY-MM-DD
 
 <!-- For substantial unfinished write-capable work, replace the bullets above
 with a concise Minimum Continuity Record (do not accumulate historical snapshots):
+project root identity (repository-relative identity or a labelled local path);
 bounded slice; planned vs observed completed work; branch and pre-commit HEAD
 (or VCS unavailable); task-owned changed paths and staged/unstaged/untracked
 status versus pre-existing/unrelated changes; commit readiness.
