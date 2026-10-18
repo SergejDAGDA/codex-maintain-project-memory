@@ -38,10 +38,13 @@ of implementation decisions. Follow
 - Under `notify` or `approve-decisions`, factual WIP scope, dirty paths,
   observed checks/failures, blockers and next action may be recorded without
   new semantic-decision approval. Inform the user of every change.
-- A request to defer **full documentation, semantic decisions, or a finished
-  checkpoint** does not implicitly defer MCR. But when the user explicitly
-  prohibits **any** memory/tracking writes or intent is unclear, stop before
-  substantial write-capable work and resolve that instruction first.
+- Only an **explicitly narrow** deferral of final semantic documentation,
+  decisions or a finished checkpoint leaves policy-permitted MCR active.
+  Broad statements such as "do not update memory", "continue, update project
+  memory at the end and ask my permission" or "do not touch STATUS/SESSION_LOG"
+  are ambiguous/no-tracking-write until clarified. Before substantial edits,
+  ask whether a minimal factual `STATUS.md` update is allowed; stop pending
+  clarification. Do not infer consent from the default policy.
 - Under `strict`, every proposed MCR write must be shown and approved in
   advance, with the existing strict diff/revalidation rules. No exception.
 - A read-only task must not write MCR. An explicit `no-commit` remains
