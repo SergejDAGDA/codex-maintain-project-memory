@@ -211,6 +211,14 @@ approved design decision, a verified completion Checkpoint, or permission to
 commit. Follow `references/lifecycle-protocol.md#minimum-wip-continuity` and
 `references/update-policy.md`.
 
+- In an existing project, first verify project-local MCR routing in the real
+  `AGENTS.md` using the read-only `audit_project_memory.py --adoption`.
+  An upgraded installed skill or old v2 marker alone does not activate routine
+  coding-session continuity; an old/missing rule requires separately approved
+  adoption before substantial ordinary coding.
+- Treat broad requests such as "update memory after completion, with my
+  permission" as ambiguous/no-tracking-write until clarified. Ask whether a
+  minimal factual `STATUS.md` WIP record is permitted before material edits.
 - Before the first material edit, establish a read-only Git/task baseline and
   ensure the short MCR can be written under the active policy. Record that
   baseline in `STATUS.md` before proceeding with substantial changes.
