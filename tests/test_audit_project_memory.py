@@ -113,17 +113,17 @@ class AuditProjectMemoryTests(unittest.TestCase):
         root = self.make_project()
         status = root / "docs" / "project-memory" / "STATUS.md"
         old = status.read_text(encoding="utf-8")
-        self.assertIn("## In progress\\n\\n- None.", old)
+        self.assertIn("## In progress\n\n- None.", old)
         wip = (
-            "## In progress\\n\\n"
-            "- Slice: UI authoring WIP; not a completed checkpoint.\\n"
-            "- Pre-commit HEAD: abc123; branch: feat/workbench.\\n"
-            "- Task-owned: frontend/workbench.js (unstaged); tests/test_ui.py (untracked).\\n"
-            "- Pre-existing: frontend/app.js (unstaged, out of scope).\\n"
-            "- Commit readiness: NOT READY.\\n"
+            "## In progress\n\n"
+            "- Slice: UI authoring WIP; not a completed checkpoint.\n"
+            "- Pre-commit HEAD: abc123; branch: feat/workbench.\n"
+            "- Task-owned: frontend/workbench.js (unstaged); tests/test_ui.py (untracked).\n"
+            "- Pre-existing: frontend/app.js (unstaged, out of scope).\n"
+            "- Commit readiness: NOT READY.\n"
         )
         status.write_text(
-            old.replace("## In progress\\n\\n- None.", wip),
+            old.replace("## In progress\n\n- None.", wip),
             encoding="utf-8",
         )
         findings = AUDIT.audit(root, stale_days=99999)
