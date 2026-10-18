@@ -83,6 +83,88 @@ When Bootstrap enters an existing project that already has some or all project-m
 
 Use Audit as the read-only adoption report. A separate migration operation is not required.
 
+## Minimum WIP continuity
+
+This is a **factual in-progress sub-step** of the existing Checkpoint/Handoff
+lifecycle, not a fifth operation and **not** a completion checkpoint. Its
+purpose is to let the next session recover unfinished substantial write-capable
+work from durable files rather than chat history alone. Use the existing
+canonical `docs/project-memory/STATUS.md` first; do not introduce a second WIP
+ledger, automatic commits, a background service or a new schema marker.
+
+### Required boundaries
+
+1. **Before the first material write:** finish read-only preflight; capture
+   project root, branch and exact HEAD (or VCS unavailable), existing
+   staged/unstaged/untracked paths and their ownership, intended bounded slice
+   and the next action. Revalidate and write the initial factual MCR before
+   beginning substantial edits, where the update policy permits it. This
+   baseline must not falsely claim an implementation has already happened.
+2. **After a meaningful implementation slice:** refresh `STATUS.md` from the
+   current diff, completed work and check results, including what remains WIP.
+   Do not write after every small edit or tool call.
+3. **On material blocker / cross-component contract mismatch:** record the
+   two observed sides, relevant paths and impact, what is verified versus
+   unresolved, and the next safe action. Do not silently choose or approve
+   a new product/architecture/security contract.
+4. **Before pause, context transfer, or a final report with material WIP:**
+   refresh MCR before handing off, even when a final verified Checkpoint and
+   Git commit are not safe. Use `HANDOFF.md` only when a real unfinished
+   workstream will transfer to another session/agent.
+
+### Minimum record and ownership
+
+Maintain a concise WIP note inside existing `STATUS.md` sections:
+`In progress`, `Blockers and risks`, `Next safe step`, and `Verification`.
+
+- bounded task scope and observed implemented-vs-planned state;
+- branch and exact observed HEAD, explicitly labelled **pre-commit**, or
+  `VCS unavailable`;
+- affected file paths and staged/unstaged/untracked state, distinguishing
+  pre-existing or unrelated changes from task-owned changes; do not stage,
+  clean or overwrite other work;
+- checks actually run/results, unverified areas and known blockers/conflicts;
+- next safe action, and `commit readiness: NOT READY` until the separate
+  verified Git-completion gates are actually satisfied.
+
+Keep `STATUS.md` a replaceable present-state summary. When a material
+boundary adds durable history, append a **short factual** event to
+`SESSION_LOG.md` without editing earlier entries. Do not append a new
+log entry for each minor change or duplicate the whole status snapshot.
+`DECISIONS.md` remains approval-gated; current code is evidence of
+implementation, **never** proof of approved intent. Exclude secrets,
+credentials and raw environment values.
+
+### Permission and failure boundaries
+
+- `notify` / `approve-decisions`: factual MCR updates are allowed by the
+  existing memory policy. A user request to defer the **complete semantic
+  memory update or finished checkpoint** does not suspend a minimal factual
+  WIP record; tell the user what was recorded. Do not reinterpret an explicit
+  ban on **all** tracking/memory writes as consent.
+- `strict`: show the exact proposed memory diff and obtain approval **before**
+  the first MCR write, as required for every memory write. If approval is not
+  available, pause substantial write-capable work instead of proceeding with
+  a potentially unrecoverable dirty tree.
+- Explicit `read-only`: no writes and no MCR mutation; reporting findings
+  in the response is allowed. Explicit `no-commit` does **not** block a
+  policy-permitted factual MCR update.
+- Explicit prohibition of any tracking-file writes, conflicting user
+  instructions, missing canonical memory, or unexpected branch/HEAD or
+  memory changes during optimistic revalidation: **stop before further
+  substantial write-capable changes**, report the constraint and ask for a
+  compatible recording plan. Do not evade it by writing a hidden/out-of-tree
+  log, committing incomplete work, or claiming memory is current.
+- Before **every** MCR write, use the same optimistic revalidation as
+  Checkpoint/Handoff. If policy/permissions block writes, a response-only
+  summary is useful evidence for the user but **does not satisfy** durable
+  continuity.
+
+WIP recording never implies that source changes are committed, tests passed,
+a decision was approved or anything was released/deployed. When the bounded
+slice is finished and verified, follow the existing Checkpoint and separate
+native Git completion procedure; replace WIP status with the actual outcome.
+
 ## Local Git completion routing
 
 After a verified, substantial write-capable change, route source/product
