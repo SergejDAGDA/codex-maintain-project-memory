@@ -32,6 +32,18 @@ Project-memory ownership:
 - other workflows may read them as evidence and report staleness, but should not opportunistically rewrite them;
 - staging, deployment, mirror, or backup copies are non-canonical unless they are explicitly declared as a separate project root.
 
+During substantial unfinished write-capable work, use the installed
+`maintain-project-memory` Minimum WIP Continuity procedure: record the factual
+baseline before material edits and refresh `STATUS.md` at meaningful slice,
+blocker, pause/handoff, or unfinished-final-report boundaries. Record branch,
+pre-commit HEAD, task-owned vs pre-existing dirty paths, checks/unknowns,
+blockers, next step and commit readiness. No commit or semantic approval follows
+from a WIP record. A request to defer full memory does not waive this minimal
+record under `notify` or `approve-decisions`; `strict` requires a reviewed
+diff for **each** write. If any memory/tracking write is expressly prohibited,
+stop before further substantial edits and ask for an agreed recording plan.
+Read-only work never writes memory; follow optimistic revalidation.
+
 After a meaningful verified stage:
 
 - run a Checkpoint: replace the current snapshot in `STATUS.md` rather than appending history;
