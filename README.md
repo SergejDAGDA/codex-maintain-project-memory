@@ -58,6 +58,13 @@ Deferring a full semantic memory update or final Git checkpoint does not
 defer this minimal factual continuity under `notify`/`approve-decisions`.
 `strict` still requires the proposed diff to be approved before every write;
 an explicit no-tracking-write or read-only instruction is never overridden.
+For existing projects, an installed skill alone does not activate the
+behavior in old project-local `AGENTS.md`; run the read-only
+`audit_project_memory.py <project-root> --adoption` check and separately
+approve a minimal project-local MCR routing addition before ordinary
+substantial coding. A broad instruction such as "update project memory only
+after finishing, with my approval" is **ambiguous**: clarify permission for a
+minimal factual status record before editing, rather than assume consent.
 If durable continuity is prohibited during substantial edits, pause and agree
 on a recording policy first. This does not add a Git commit, schema change,
 fifth skill operation or new source of truth. It is a policy contract, not an
