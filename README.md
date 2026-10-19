@@ -57,7 +57,7 @@ slice/blocker/pause boundaries. Significant transitions may be appended to
 Deferring a full semantic memory update or final Git checkpoint does not
 defer this minimal factual continuity under `notify`/`approve-decisions`.
 `strict` still requires the proposed diff to be approved before every write;
-an explicit no-tracking-write or read-only instruction is never overridden.
+an explicit no-tracking-write or task-wide read-only instruction is never overridden.
 For existing projects, an installed skill alone does not activate the
 behavior in old project-local `AGENTS.md`; run the read-only
 `audit_project_memory.py <project-root> --adoption` check and separately
@@ -69,6 +69,25 @@ If durable continuity is prohibited during substantial edits, pause and agree
 on a recording policy first. This does not add a Git commit, schema change,
 fifth skill operation or new source of truth. It is a policy contract, not an
 automated guarantee when the agent fails to follow project instructions.
+
+## Verified completion Checkpoint
+
+At the close of a substantial task, evaluate whether a meaningful verified
+outcome requires a Checkpoint. When project-memory writes are permitted, update
+the current `STATUS.md` and append a concise factual `SESSION_LOG.md` entry
+**before** reporting durable completion. If policy, permissions, or explicit
+no-tracking-write scope prevents this, report the underlying task result
+separately from `Checkpoint: PENDING`; do not claim memory is synchronized.
+A read-only server/runtime operation may still receive a factual Checkpoint
+when local project-memory writes are expressly allowed. A task-wide read-only
+instruction prohibits it.
+
+The project-local `AGENTS.md` should declare a `Completion Checkpoint procedure:`
+route in addition to MCR. `audit_project_memory.py --adoption` reports
+`checkpoint_routing` separately from `wip_continuity_routing`. Both are
+**structural diagnostics**, not proof of execution or semantic recoverability.
+Git commit authorization stays independent. Actual agent behavior and cold-start
+recovery still require scenario-based acceptance tests.
 
 ## Local Git checkpoint policy
 

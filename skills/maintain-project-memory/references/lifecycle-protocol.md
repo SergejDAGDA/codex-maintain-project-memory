@@ -220,6 +220,10 @@ into release, deployment or runtime authority.
 
 ## Checkpoint triggers
 
+Task closeout is the **evaluation boundary**, not a new lifecycle operation. Before reporting substantial work as durably complete, evaluate the triggers below. If a meaningful verified outcome occurred and the active memory policy and task scope permit writes, update `STATUS.md` and append the factual historical `SESSION_LOG.md` Checkpoint. If a required write is prohibited or fails, report the completed work separately from `Checkpoint: PENDING`, including the blocker and next allowed synchronization step. A chat-only summary does not establish durable continuity. Local Git commit policy is independent of this decision.
+
+Read-only server/runtime operations are distinct from task-wide read-only restrictions: when local memory writes are explicitly permitted, a meaningful verified read-only operation may receive a Checkpoint. An explicit task-wide read-only/no-tracking-write instruction still forbids it. Do not create an MCR for read-only work.
+
 A Checkpoint is appropriate after a meaningful verified boundary, including:
 
 - a completed feature or bug-fix stage;

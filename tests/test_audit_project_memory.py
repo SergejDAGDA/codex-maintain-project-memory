@@ -172,6 +172,66 @@ class AuditProjectMemoryTests(unittest.TestCase):
             findings,
         )
 
+    def test_completion_checkpoint_routing_is_separately_reported(self) -> None:
+        root = self.make_project()
+        report = AUDIT.adoption_report(root)
+        self.assertIn("ADOPTION checkpoint_routing=declared", report)
+        self.assertIn("ADOPTION wip_continuity_routing=declared", report)
+
+        agents = root / "AGENTS.md"
+        current = agents.read_text(encoding="utf-8")
+        start = current.index("Completion Checkpoint procedure:")
+        end = current.index("When this project has an approved", start)
+        agents.write_text(current[:start] + current[end:], encoding="utf-8")
+
+        report = AUDIT.adoption_report(root)
+        self.assertIn("ADOPTION checkpoint_routing=missing-review-required", report)
+        self.assertIn("ADOPTION wip_continuity_routing=declared", report)
+        findings = AUDIT.audit(root, stale_days=99999, adoption=True)
+        self.assertTrue(
+            any("Completion Checkpoint routing absent or incomplete" in x for x in findings),
+            findings,
+        )
+
+    def test_legacy_template_after_stage_routing_remains_recognized(self) -> None:
+        root = self.make_project()
+        agents = root / "AGENTS.md"
+        current = agents.read_text(encoding="utf-8")
+        start = current.index("Completion Checkpoint procedure:")
+        end = current.index("After a meaningful verified stage:", start)
+        agents.write_text(current[:start] + current[end:], encoding="utf-8")
+        self.assertIn(
+            "ADOPTION checkpoint_routing=declared",
+            AUDIT.adoption_report(root),
+        )
+
+    def test_completion_marker_supports_localized_instructions(self) -> None:
+        root = self.make_project()
+        agents = root / "AGENTS.md"
+        current = agents.read_text(encoding="utf-8")
+        start = current.index("Completion Checkpoint procedure:")
+        end = current.index("When this project has an approved", start)
+        localized = (
+            "Completion Checkpoint procedure: После значимого этапа "
+            "выполнить Checkpoint: обновить STATUS.md и SESSION_LOG.md. "
+            "При запрете записи сообщить, что Checkpoint остаётся pending."
+        )
+        agents.write_text(current[:start] + localized + "\n\n" + current[end:], encoding="utf-8")
+        self.assertIn(
+            "ADOPTION checkpoint_routing=declared",
+            AUDIT.adoption_report(root),
+        )
+
+    def test_missing_session_log_target_fails_completion_routing(self) -> None:
+        root = self.make_project()
+        agents = root / "AGENTS.md"
+        current = agents.read_text(encoding="utf-8")
+        agents.write_text(current.replace("SESSION_LOG.md", "HISTORY.md"), encoding="utf-8")
+        self.assertIn(
+            "ADOPTION checkpoint_routing=missing-review-required",
+            AUDIT.adoption_report(root),
+        )
+
     def test_current_status_dates_do_not_trigger_history_warning(self) -> None:
         root = self.make_project()
         status = root / "docs" / "project-memory" / "STATUS.md"

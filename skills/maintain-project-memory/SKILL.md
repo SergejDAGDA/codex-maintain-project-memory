@@ -238,6 +238,10 @@ commit. Follow `references/lifecycle-protocol.md#minimum-wip-continuity` and
 
 ## Checkpoint
 
+At task closeout for every substantial task, evaluate whether a meaningful verified Checkpoint trigger occurred **before reporting durable completion**. When it occurred and project-memory writes are permitted, finish the factual Checkpoint in the canonical `STATUS.md` and `SESSION_LOG.md` before the final response. When explicit scope, update policy, strict approval, missing canonical memory, or optimistic revalidation blocks a required Checkpoint, report the underlying task result separately, state `Checkpoint: PENDING` and the reason, and do not claim project memory is synchronized. A response-only summary cannot replace a permitted Checkpoint.
+
+A read-only **target/server/runtime** operation can still yield a factual Checkpoint when local project-memory writes are expressly permitted. An explicit **task-wide read-only** or no-tracking-write restriction forbids memory writes. This distinction does not authorize an MCR for read-only work or override any higher-priority prohibition.
+
 Update memory only after a meaningful verified outcome: a completed feature/bug-fix stage, investigation conclusion, architecture/schema/security/product/data/operational decision, release/deployment/migration boundary, approved change of direction, materially changed next safe action, handoff closure, or durable conflict/risk that must survive the current session. Do not create a checkpoint for trivial formatting, ordinary reading, transient debugging, or an intermediate experiment with no durable effect.
 
 For an agreed concept change or new product direction, treat the checkpoint as an `Approved evolution` only when approval provenance is concrete. Update `DECISIONS.md`, `PROJECT.md`, and `STATUS.md`; update `AGENTS.md` only if agent operating rules, source-of-truth routing, memory policy, or project-memory protocol changed. Do not let older MVP or baseline text override the approved new direction.

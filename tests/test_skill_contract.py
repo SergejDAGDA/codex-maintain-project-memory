@@ -91,6 +91,28 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("other workflows may read them as evidence and report staleness", agents)
         self.assertIn("should not opportunistically rewrite them", agents)
 
+    def test_substantial_task_closeout_requires_permitted_checkpoint(self) -> None:
+        skill = self.read("SKILL.md")
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        interface = self.read("agents/openai.yaml")
+        agents = self.read("assets/templates/AGENTS.memory.fragment.md")
+        for text in (skill, lifecycle, interface, agents):
+            self.assertIn("Checkpoint: PENDING", text)
+            self.assertIn("closeout", text)
+            self.assertIn("STATUS.md", text)
+            self.assertIn("SESSION_LOG.md", text)
+        self.assertIn("Completion Checkpoint procedure:", agents)
+        self.assertIn("task-wide read-only", agents)
+        self.assertIn("read-only target/server/runtime", agents)
+        self.assertIn("Local Git commit policy is independent", lifecycle)
+        self.assertNotIn("Read-only work never writes memory", agents)
+
+    def test_adoption_diagnostic_distinguishes_wip_and_completion(self) -> None:
+        audit = self.read("scripts/audit_project_memory.py")
+        self.assertIn("def _checkpoint_routing(", audit)
+        self.assertIn("ADOPTION checkpoint_routing=", audit)
+        self.assertIn("Completion Checkpoint routing absent or incomplete", audit)
+
     def test_local_git_checkpoint_policy_is_project_scoped_and_safe(self) -> None:
         guide = self.read("references/local-git-checkpoints.md")
         agents = self.read("assets/templates/AGENTS.memory.fragment.md")

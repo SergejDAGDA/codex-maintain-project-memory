@@ -46,7 +46,9 @@ clarify whether the minimal factual WIP update is allowed **before coding**.
 `strict` requires a reviewed diff for **each** write. If any memory/tracking
 write is expressly prohibited, stop before further substantial edits and
 ask for an agreed recording plan.
-Read-only work never writes memory; follow optimistic revalidation.
+An explicit task-wide read-only or no-tracking-write instruction prohibits project-memory writes. A read-only target/server/runtime operation may still create a factual Checkpoint when local memory writes are expressly in scope; use optimistic revalidation.
+
+Completion Checkpoint procedure: at substantial task closeout, check for a meaningful verified outcome before reporting durable completion. When permitted, replace the current snapshot in `STATUS.md` and append a concise factual event to `SESSION_LOG.md`. If a required Checkpoint is prohibited or blocked, report the underlying result separately from `Checkpoint: PENDING` and its reason; do not imply that canonical memory is synchronized. Skipping a local Git commit never waives a permitted factual Checkpoint.
 
 After a meaningful verified stage:
 
