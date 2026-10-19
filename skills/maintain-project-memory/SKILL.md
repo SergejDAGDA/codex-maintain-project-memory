@@ -254,8 +254,15 @@ Before any Checkpoint write, perform optimistic revalidation as defined in `refe
 4. Before adding to `DECISIONS.md`, search existing entries for the same decision. Update or supersede the existing entry instead of duplicating it. Append only when a consequential decision is genuinely new and approved; otherwise mark it `Proposed` or `Unverified`.
 5. Update stable `PROJECT.md` content only when the underlying project truth changed.
 6. Clear resolved work from `HANDOFF.md`; reset it to the empty template when no substantial unfinished work remains.
-7. Report which memory files changed and why.
-8. For a material **write-capable** completed stage, coordinate the native local
+7. Before reporting `Checkpoint: COMPLETE`, perform a **bounded semantic reconciliation of task-relevant current claims** across `PROJECT.md`, `STATUS.md`, `DECISIONS.md`, `SESSION_LOG.md` and any active `HANDOFF.md`:
+   - `STATUS.md` must describe the post-task reality, with actual checks, pending actions, and Git/source/runtime identities distinguished.
+   - `PROJECT.md` must not present an obsolete pre-task stage or “no checkpoint recorded” assertion as **current** once the recorded facts have changed; update its stable project description only where verified truth changed, otherwise point current coordination claims to `STATUS.md`.
+   - Keep `SESSION_LOG.md` strictly append-only. Statements in dated earlier checkpoints remain **historical evidence**, not automatically contradictory current claims. Append the current outcome; do not rewrite old entries to hide an earlier state.
+   - Label a formerly failing RED test or other pre-fix evidence as **historical/pre-change**, distinct from current verification.
+   - Do not label tests, code, README or a descriptive source-of-truth table as `Approved intent` without explicit approval provenance. Preserve uncertain intent as unverified; do not manufacture approval or silently alter consequential decisions.
+   Only correct task-relevant, evidenced stale current statements within the active write policy. If a material inconsistency cannot be reconciled without prohibited writes or unapproved decisions, report `Checkpoint: PENDING` and the exact conflict, even when code and structural audit pass. Do not require edits to unchanged files merely to satisfy this review.
+8. Report which memory files changed and why.
+9. For a material **write-capable** completed stage, coordinate the native local
    Git checkpoint **after** affected product documentation and project-memory
    updates, according to `references/local-git-checkpoints.md`. Apply the
    independent project-local policy. An Audit, a read-only task, or an explicit

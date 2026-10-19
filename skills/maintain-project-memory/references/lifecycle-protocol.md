@@ -237,6 +237,12 @@ A Checkpoint is appropriate after a meaningful verified boundary, including:
 
 Do not create a Checkpoint for trivial formatting, ordinary reading, a transient debugging attempt, or an intermediate experiment that does not change durable project understanding.
 
+### Checkpoint semantic closeout
+
+Before claiming the canonical Checkpoint is complete, compare **task-relevant current-state assertions** in `STATUS.md` with the stable scope/stage and source map in `PROJECT.md`, the approval provenance in `DECISIONS.md`, any active `HANDOFF.md`, and the latest historical entry in `SESSION_LOG.md`. This is a bounded consistency review, **not** a full repository audit or a new validator.
+
+A pre-task stage, an assertion that no Checkpoint exists, or an old failing test must not remain presented as current after a verified completion. Preserve dated earlier log entries as historical evidence and keep `SESSION_LOG.md` append-only; a historical “none yet” statement is not itself a live contradiction. Label RED/pre-fix checks as historical, and describe current verification separately. Code, tests and descriptive documentation do not establish approval provenance. Reconcile only verified factual drift permitted by the active update policy, and preserve unrelated user edits. If a task-relevant contradiction cannot be resolved within authorized scope, report `Checkpoint: PENDING` with the exact inconsistency rather than silently claiming synchronized memory. A structural audit PASS cannot substitute for this semantic review.
+
 ## Pre-write optimistic revalidation
 
 At session start, capture the current project-memory file fingerprints and repository identity when available. Immediately before writing a Checkpoint or Handoff:

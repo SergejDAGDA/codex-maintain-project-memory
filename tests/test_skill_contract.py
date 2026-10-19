@@ -107,6 +107,28 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("Local Git commit policy is independent", lifecycle)
         self.assertNotIn("Read-only work never writes memory", agents)
 
+    def test_checkpoint_requires_cross_file_semantic_closeout(self) -> None:
+        skill = self.read("SKILL.md")
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        agents = self.read("assets/templates/AGENTS.memory.fragment.md")
+        interface = self.read("agents/openai.yaml")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for text in (skill, lifecycle, agents, interface):
+            self.assertIn("PROJECT.md", text)
+            self.assertIn("STATUS.md", text)
+            self.assertIn("DECISIONS.md", text)
+            self.assertIn("SESSION_LOG.md", text)
+            self.assertIn("Checkpoint: PENDING", text)
+        for text in (skill, lifecycle, agents, readme):
+            self.assertIn("historical", text)
+            self.assertIn("RED", text)
+            self.assertIn("approval", text.lower())
+        self.assertIn("bounded semantic reconciliation", skill)
+        self.assertIn("Checkpoint: COMPLETE", agents)
+        self.assertIn("structural audit PASS", lifecycle)
+        self.assertIn("append-only", lifecycle)
+        self.assertIn("Do not require edits to unchanged files", skill)
+
     def test_adoption_diagnostic_distinguishes_wip_and_completion(self) -> None:
         audit = self.read("scripts/audit_project_memory.py")
         self.assertIn("def _checkpoint_routing(", audit)

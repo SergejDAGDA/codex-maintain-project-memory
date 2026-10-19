@@ -89,6 +89,15 @@ route in addition to MCR. `audit_project_memory.py --adoption` reports
 Git commit authorization stays independent. Actual agent behavior and cold-start
 recovery still require scenario-based acceptance tests.
 
+A permitted Checkpoint is complete only after a bounded **semantic closeout**
+of task-relevant current claims. Reconcile `PROJECT.md` and `STATUS.md` when
+a prior stage has become obsolete, preserve dated `SESSION_LOG.md` entries as
+historical, distinguish earlier RED tests from current passing checks, and
+never infer approved intent from code or tests. Do not rewrite historical
+checkpoints or edit every memory file by default. If a material current
+contradiction remains and cannot be resolved under the active policy, report
+`Checkpoint: PENDING`, even when the structural audit passes.
+
 ## Local Git checkpoint policy
 
 For **new projects** that adopt the bundled `AGENTS.md` memory fragment,

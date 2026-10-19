@@ -56,6 +56,7 @@ After a meaningful verified stage:
 - append factual outcomes and checks to `SESSION_LOG.md`;
 - record consequential decisions in `DECISIONS.md`, using `Proposed` or `Unverified` until approval is established;
 - update `HANDOFF.md` only for substantial unfinished work and reset it when that workstream finishes;
+- before declaring `Checkpoint: COMPLETE`, reconcile task-relevant current claims across `PROJECT.md`, `STATUS.md`, `DECISIONS.md`, `SESSION_LOG.md` and any active `HANDOFF.md`: no obsolete pre-task stage presented as current, historical RED checks labelled as pre-change, and no assumed approval from code/tests; keep `SESSION_LOG.md` append-only and earlier dated entries historical. If a required factual correction is blocked, report `Checkpoint: PENDING` with the conflict, even if structural audit passes. Do not force edits to files with no stale current claims;
 - report every memory file changed;
 - when this verified stage changed project files and the declared Local Git commit policy permits it, synchronize affected product docs (use `project-documentation` if installed and relevant; otherwise update the maintained docs directly) and memory first, then make one narrowly scoped **local-only** Git commit via native Git. Never stage unrelated changes. See the installed `maintain-project-memory` skill's `references/local-git-checkpoints.md`.
 
