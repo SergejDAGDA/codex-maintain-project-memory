@@ -44,7 +44,7 @@ Protocol v2 adds:
 
 It does **not** change the core semantics: `STATUS.md` stays a replaceable current snapshot, `SESSION_LOG.md` stays append-only history, and `HANDOFF.md` stays active unfinished-work context only.
 
-## Minimum unfinished-work continuity (v0.1.5 candidate)
+## Minimum unfinished-work continuity
 
 During substantial unfinished write-capable development, the active task keeps a
 short factual WIP record in the **existing** `STATUS.md`: branch/pre-commit
@@ -93,10 +93,12 @@ A permitted Checkpoint is complete only after a bounded **semantic closeout**
 of task-relevant current claims. Reconcile `PROJECT.md` and `STATUS.md` when
 a prior stage has become obsolete, preserve dated `SESSION_LOG.md` entries as
 historical, distinguish earlier RED tests from current passing checks, and
-never infer approved intent from code or tests. Do not rewrite historical
-checkpoints or edit every memory file by default. If a material current
-contradiction remains and cannot be resolved under the active policy, report
-`Checkpoint: PENDING`, even when the structural audit passes.
+never infer approved intent from code or tests. The `PROJECT.md` sources-of-truth
+table maps stable evidence roles rather than duplicating volatile work status;
+`Approved intent` requires concrete approval provenance. Do not rewrite
+historical checkpoints or edit every memory file by default. If a material
+current contradiction remains and cannot be resolved under the active policy,
+report `Checkpoint: PENDING`, even when the structural audit passes.
 
 ## Local Git checkpoint policy
 
@@ -118,7 +120,7 @@ The exact safe native Git workflow, staging guards and revision semantics
 are in `references/local-git-checkpoints.md`. This does not promise
 automatic invocation in sessions that ignore the repository's `AGENTS.md`.
 
-**Installable skill version: 0.1.4.** The installed
+**Installable skill version: 0.1.6.** The installed
 `skills/maintain-project-memory/VERSION` marker is independent of the
 project-memory protocol/schema markers.
 

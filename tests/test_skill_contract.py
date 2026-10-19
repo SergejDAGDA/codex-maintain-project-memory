@@ -169,7 +169,7 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("references/local-git-checkpoints.md", skill)
         self.assertIn("references/local-git-checkpoints.md", lifecycle)
         self.assertIn("independent", policy)
-        self.assertIn("0.1.5", self.read("VERSION").strip())
+        self.assertEqual("0.1.6", self.read("VERSION").strip())
 
     def test_minimum_wip_continuity_boundaries_and_no_new_operation(self) -> None:
         lifecycle = self.read("references/lifecycle-protocol.md")
