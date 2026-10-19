@@ -181,6 +181,38 @@ class SkillFreshnessTests(unittest.TestCase):
         self.assertEqual(result["verification_scope"], "recorded-install")
         self.assertTrue(result["write_eligible"])
 
+    def test_canonical_repository_uses_renamed_github_identity(self) -> None:
+        self.assertEqual(
+            MODULE.CANONICAL_REPOSITORY,
+            "SergejDAGDA/maintain-project-memory-skill",
+        )
+
+    def test_legacy_repository_receipt_is_not_trusted_after_migration(self) -> None:
+        commit = "f" * 40
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "skill"
+            root.mkdir()
+            (root / "SKILL.md").write_text("hello\n", encoding="utf-8")
+            receipt = Path(tmp) / "receipt.json"
+            self._write_receipt(root, receipt, commit)
+            data = json.loads(receipt.read_text(encoding="utf-8"))
+            data["canonical_repository"] = (
+                "https://github.com/SergejDAGDA/codex-maintain-project-memory"
+            )
+            receipt.write_text(json.dumps(data), encoding="utf-8")
+
+            with self.assertRaisesRegex(ValueError, "canonical repository"):
+                MODULE.load_provenance(receipt)
+
+            with mock.patch.object(
+                MODULE,
+                "online_result",
+                side_effect=urllib.error.URLError("blocked"),
+            ):
+                result = MODULE.result_payload(root, 1.0, receipt, commit)
+            self.assertEqual(result["status"], "unverified")
+            self.assertFalse(result["write_eligible"])
+
 
 if __name__ == "__main__":
     unittest.main()

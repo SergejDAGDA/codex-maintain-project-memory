@@ -34,6 +34,7 @@ class SkillProvenanceTests(unittest.TestCase):
             blobs = CHECK_MODULE.local_blob_map(root)
 
         self.assertEqual(receipt["schema"], CHECK_MODULE.PROVENANCE_SCHEMA)
+        self.assertEqual(receipt["canonical_repository"], "https://github.com/SergejDAGDA/maintain-project-memory-skill")
         self.assertEqual(receipt["canonical_commit"], commit)
         self.assertEqual(receipt["recorded_from"], "user-confirmed-install")
         self.assertEqual(receipt["payload_file_count"], 1)

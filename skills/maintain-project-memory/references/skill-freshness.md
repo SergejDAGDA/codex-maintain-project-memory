@@ -6,8 +6,10 @@ This reference defines how `maintain-project-memory` verifies that the installed
 
 Canonical repository:
 
-- `https://github.com/SergejDAGDA/codex-maintain-project-memory`
+- `https://github.com/SergejDAGDA/maintain-project-memory-skill`
 - branch: `main`
+
+Repository identity migration: earlier installs and offline receipts may name `SergejDAGDA/codex-maintain-project-memory`. That URL is historical; do not edit or reinterpret an old receipt as proof of the renamed canonical source. A receipt naming the previous repository is rejected by the current checker. After separately authorizing and verifying the new installation against an exact canonical commit, record a fresh receipt with `record_skill_provenance.py`. Do not create new provenance solely because the GitHub repository was renamed.
 
 The canonical repository commit identifies the current skill implementation. This is separate from the project-local protocol marker (`maintain-project-memory/v2`) and from the project-memory schema marker (`project-memory/v1`). A project may be on protocol v2 while the installed skill implementation is stale.
 
