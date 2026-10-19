@@ -71,6 +71,20 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("Do not overwrite them with templates", lifecycle)
         self.assertIn("Preserve the existing update policy", lifecycle)
 
+    def test_project_template_keeps_source_roles_stable(self) -> None:
+        template = self.read("assets/templates/PROJECT.md")
+        skill = self.read("SKILL.md")
+        self.assertIn("stable evidence roles", template)
+        self.assertIn("not the project's transient current results", template)
+        self.assertIn("Do not", template)
+        self.assertIn("passing test results", template)
+        self.assertIn("Leave the `Approved intent` source", template)
+        self.assertIn("unless a concrete user approval", template)
+        self.assertIn("point to STATUS.md", template)
+        self.assertIn("not a second current-state snapshot", skill)
+        self.assertIn("Leave the `Approved intent` source as `TBD`", skill)
+        self.assertIn("route current work status to `STATUS.md`", skill)
+
     def test_current_file_semantics_remain_separate(self) -> None:
         agents = self.read("assets/templates/AGENTS.memory.fragment.md")
         session_log = self.read("assets/templates/SESSION_LOG.md")

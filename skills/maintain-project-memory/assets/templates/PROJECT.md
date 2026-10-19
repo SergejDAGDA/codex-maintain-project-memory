@@ -16,7 +16,7 @@
 
 ## Baseline and evolution
 
-<!-- Identify the initial brief/specification and the current implemented stage. Record approved evolution, unresolved divergence, and superseded decisions explicitly. -->
+<!-- Record the initial baseline and durable evolution of scope or capabilities. For the current work stage, latest checks, blockers, and next action, point to STATUS.md instead of repeating a volatile snapshot here. Record approved evolution, unresolved divergence, and superseded decisions explicitly with provenance. -->
 
 ## System map
 
@@ -27,6 +27,13 @@
 - TBD
 
 ## Sources of truth
+
+This table maps **stable evidence roles to their authoritative sources**. Describe what
+each source can establish, not the project's transient current results. Do not
+copy failing/passing test results, current bugs, task completion, blockers or next
+steps from `STATUS.md` into these rows. Leave the `Approved intent` source
+as `TBD` unless a concrete user approval or explicitly governing approved source
+is identified; code, tests and descriptive project files alone do not prove approval.
 
 | Evidence role | Canonical source | What it establishes |
 |---|---|---|
