@@ -220,6 +220,10 @@ into release, deployment or runtime authority.
 
 ## Checkpoint triggers
 
+Task closeout is the **evaluation boundary**, not a new lifecycle operation. Before reporting substantial work as durably complete, evaluate the triggers below. If a meaningful verified outcome occurred and the active memory policy and task scope permit writes, update `STATUS.md` and append the factual historical `SESSION_LOG.md` Checkpoint. If a required write is prohibited or fails, report the completed work separately from `Checkpoint: PENDING`, including the blocker and next allowed synchronization step. A chat-only summary does not establish durable continuity. Local Git commit policy is independent of this decision.
+
+Read-only server/runtime operations are distinct from task-wide read-only restrictions: when local memory writes are explicitly permitted, a meaningful verified read-only operation may receive a Checkpoint. An explicit task-wide read-only/no-tracking-write instruction still forbids it. Do not create an MCR for read-only work.
+
 A Checkpoint is appropriate after a meaningful verified boundary, including:
 
 - a completed feature or bug-fix stage;
@@ -232,6 +236,12 @@ A Checkpoint is appropriate after a meaningful verified boundary, including:
 - a durable conflict or risk that must survive the current session.
 
 Do not create a Checkpoint for trivial formatting, ordinary reading, a transient debugging attempt, or an intermediate experiment that does not change durable project understanding.
+
+### Checkpoint semantic closeout
+
+Before claiming the canonical Checkpoint is complete, compare **task-relevant current-state assertions** in `STATUS.md` with the stable scope/stage and source map in `PROJECT.md`, the approval provenance in `DECISIONS.md`, any active `HANDOFF.md`, and the latest historical entry in `SESSION_LOG.md`. This is a bounded consistency review, **not** a full repository audit or a new validator.
+
+A pre-task stage, an assertion that no Checkpoint exists, or an old failing test must not remain presented as current after a verified completion. Preserve dated earlier log entries as historical evidence and keep `SESSION_LOG.md` append-only; a historical “none yet” statement is not itself a live contradiction. Label RED/pre-fix checks as historical, and describe current verification separately. Code, tests and descriptive documentation do not establish approval provenance. Reconcile only verified factual drift permitted by the active update policy, and preserve unrelated user edits. If a task-relevant contradiction cannot be resolved within authorized scope, report `Checkpoint: PENDING` with the exact inconsistency rather than silently claiming synchronized memory. A structural audit PASS cannot substitute for this semantic review.
 
 ## Pre-write optimistic revalidation
 

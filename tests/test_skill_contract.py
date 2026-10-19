@@ -71,6 +71,20 @@ class SkillContractTests(unittest.TestCase):
         self.assertIn("Do not overwrite them with templates", lifecycle)
         self.assertIn("Preserve the existing update policy", lifecycle)
 
+    def test_project_template_keeps_source_roles_stable(self) -> None:
+        template = self.read("assets/templates/PROJECT.md")
+        skill = self.read("SKILL.md")
+        self.assertIn("stable evidence roles", template)
+        self.assertIn("not the project's transient current results", template)
+        self.assertIn("Do not", template)
+        self.assertIn("passing test results", template)
+        self.assertIn("Leave the `Approved intent` source", template)
+        self.assertIn("unless a concrete user approval", template)
+        self.assertIn("point to STATUS.md", template)
+        self.assertIn("not a second current-state snapshot", skill)
+        self.assertIn("Leave the `Approved intent` source as `TBD`", skill)
+        self.assertIn("route current work status to `STATUS.md`", skill)
+
     def test_current_file_semantics_remain_separate(self) -> None:
         agents = self.read("assets/templates/AGENTS.memory.fragment.md")
         session_log = self.read("assets/templates/SESSION_LOG.md")
@@ -90,6 +104,50 @@ class SkillContractTests(unittest.TestCase):
         agents = self.read("assets/templates/AGENTS.memory.fragment.md")
         self.assertIn("other workflows may read them as evidence and report staleness", agents)
         self.assertIn("should not opportunistically rewrite them", agents)
+
+    def test_substantial_task_closeout_requires_permitted_checkpoint(self) -> None:
+        skill = self.read("SKILL.md")
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        interface = self.read("agents/openai.yaml")
+        agents = self.read("assets/templates/AGENTS.memory.fragment.md")
+        for text in (skill, lifecycle, interface, agents):
+            self.assertIn("Checkpoint: PENDING", text)
+            self.assertIn("closeout", text)
+            self.assertIn("STATUS.md", text)
+            self.assertIn("SESSION_LOG.md", text)
+        self.assertIn("Completion Checkpoint procedure:", agents)
+        self.assertIn("task-wide read-only", agents)
+        self.assertIn("read-only target/server/runtime", agents)
+        self.assertIn("Local Git commit policy is independent", lifecycle)
+        self.assertNotIn("Read-only work never writes memory", agents)
+
+    def test_checkpoint_requires_cross_file_semantic_closeout(self) -> None:
+        skill = self.read("SKILL.md")
+        lifecycle = self.read("references/lifecycle-protocol.md")
+        agents = self.read("assets/templates/AGENTS.memory.fragment.md")
+        interface = self.read("agents/openai.yaml")
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        for text in (skill, lifecycle, agents, interface):
+            self.assertIn("PROJECT.md", text)
+            self.assertIn("STATUS.md", text)
+            self.assertIn("DECISIONS.md", text)
+            self.assertIn("SESSION_LOG.md", text)
+            self.assertIn("Checkpoint: PENDING", text)
+        for text in (skill, lifecycle, agents, readme):
+            self.assertIn("historical", text)
+            self.assertIn("RED", text)
+            self.assertIn("approval", text.lower())
+        self.assertIn("bounded semantic reconciliation", skill)
+        self.assertIn("Checkpoint: COMPLETE", agents)
+        self.assertIn("structural audit PASS", lifecycle)
+        self.assertIn("append-only", lifecycle)
+        self.assertIn("Do not require edits to unchanged files", skill)
+
+    def test_adoption_diagnostic_distinguishes_wip_and_completion(self) -> None:
+        audit = self.read("scripts/audit_project_memory.py")
+        self.assertIn("def _checkpoint_routing(", audit)
+        self.assertIn("ADOPTION checkpoint_routing=", audit)
+        self.assertIn("Completion Checkpoint routing absent or incomplete", audit)
 
     def test_local_git_checkpoint_policy_is_project_scoped_and_safe(self) -> None:
         guide = self.read("references/local-git-checkpoints.md")

@@ -176,6 +176,17 @@ def _wip_continuity_routing(agents_text: str) -> str:
     return "declared" if has_route and has_boundary else "missing-review-required"
 
 
+def _checkpoint_routing(agents_text: str) -> str:
+    """Detect project-local completion routing, not proof that writes occurred."""
+    has_boundary = (
+        "Completion Checkpoint procedure:" in agents_text
+        or "After a meaningful verified stage:" in agents_text
+    )
+    has_targets = "STATUS.md" in agents_text and "SESSION_LOG.md" in agents_text
+    has_lifecycle = "Checkpoint" in agents_text
+    return "declared" if has_boundary and has_targets and has_lifecycle else "missing-review-required"
+
+
 def adoption_report(project_root: Path) -> list[str]:
     project_root = project_root.resolve()
     agents = project_root / "AGENTS.md"
@@ -229,6 +240,7 @@ def adoption_report(project_root: Path) -> list[str]:
         f"ADOPTION canonical_root={memory_root}",
         f"ADOPTION local_git_commit_policy={local_git_policy}",
         f"ADOPTION wip_continuity_routing={_wip_continuity_routing(agents_text)}",
+        f"ADOPTION checkpoint_routing={_checkpoint_routing(agents_text)}",
         f"ADOPTION vcs={vcs}",
         f"ADOPTION handoff={handoff_state}",
         (
@@ -435,6 +447,11 @@ def audit(project_root: Path, stale_days: int, adoption: bool = False) -> list[s
             findings.append(
                 "WARN AGENTS.md: WIP continuity routing absent or incomplete; "
                 "review and approve the project-local MCR instruction before substantial edits"
+            )
+        if _checkpoint_routing(agents_text if agents.exists() else "") != "declared":
+            findings.append(
+                "WARN AGENTS.md: Completion Checkpoint routing absent or incomplete; "
+                "review the project-local after-stage STATUS.md / SESSION_LOG.md procedure"
             )
         for nested in _nested_memory_roots(project_root):
             findings.append(

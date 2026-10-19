@@ -108,7 +108,7 @@ Separate evidence roles explicitly:
 - explicit user approval, an attributable approved decision, or a governing approved specification establishes approved intent;
 - project memory is a durable index of evidence, not self-validating proof merely because an agent previously wrote it.
 
-In `PROJECT.md -> Sources of truth`, name these roles separately. Never write an undifferentiated claim such as “the current repository and docs are authoritative.” State what each source can establish: implemented state, approved intent, current coordination state, operational/runtime state, or historical evidence.
+In `PROJECT.md -> Sources of truth`, name these roles separately. Never write an undifferentiated claim such as “the current repository and docs are authoritative.” State what each source can establish: implemented state, approved intent, current coordination state, operational/runtime state, or historical evidence. **Keep this table a stable map of evidence roles and pointers, not a second current-state snapshot**: do not duplicate outstanding bugs, passing/failing test results, task completion, blockers, or next steps from `STATUS.md`. Leave the `Approved intent` source as `TBD` when there is no concrete user approval or approved governing source; tests, code and descriptive documentation alone do not qualify. In `Baseline and evolution`, record durable project milestones and route current work status to `STATUS.md` rather than restating a volatile stage.
 
 Use the canonical role mapping from the PROJECT template: `Current coordination state` points to `STATUS.md` and an active `HANDOFF.md`, `Decision index` points to `DECISIONS.md`, and `Historical checkpoints` points to `SESSION_LOG.md`. Maintained README/deployment docs are implementation or operational-description evidence, not current coordination state. Runtime/deployment records may be operational authority for their own claim domain; project memory points to them but does not replace them.
 
@@ -238,6 +238,10 @@ commit. Follow `references/lifecycle-protocol.md#minimum-wip-continuity` and
 
 ## Checkpoint
 
+At task closeout for every substantial task, evaluate whether a meaningful verified Checkpoint trigger occurred **before reporting durable completion**. When it occurred and project-memory writes are permitted, finish the factual Checkpoint in the canonical `STATUS.md` and `SESSION_LOG.md` before the final response. When explicit scope, update policy, strict approval, missing canonical memory, or optimistic revalidation blocks a required Checkpoint, report the underlying task result separately, state `Checkpoint: PENDING` and the reason, and do not claim project memory is synchronized. A response-only summary cannot replace a permitted Checkpoint.
+
+A read-only **target/server/runtime** operation can still yield a factual Checkpoint when local project-memory writes are expressly permitted. An explicit **task-wide read-only** or no-tracking-write restriction forbids memory writes. This distinction does not authorize an MCR for read-only work or override any higher-priority prohibition.
+
 Update memory only after a meaningful verified outcome: a completed feature/bug-fix stage, investigation conclusion, architecture/schema/security/product/data/operational decision, release/deployment/migration boundary, approved change of direction, materially changed next safe action, handoff closure, or durable conflict/risk that must survive the current session. Do not create a checkpoint for trivial formatting, ordinary reading, transient debugging, or an intermediate experiment with no durable effect.
 
 For an agreed concept change or new product direction, treat the checkpoint as an `Approved evolution` only when approval provenance is concrete. Update `DECISIONS.md`, `PROJECT.md`, and `STATUS.md`; update `AGENTS.md` only if agent operating rules, source-of-truth routing, memory policy, or project-memory protocol changed. Do not let older MVP or baseline text override the approved new direction.
@@ -250,8 +254,15 @@ Before any Checkpoint write, perform optimistic revalidation as defined in `refe
 4. Before adding to `DECISIONS.md`, search existing entries for the same decision. Update or supersede the existing entry instead of duplicating it. Append only when a consequential decision is genuinely new and approved; otherwise mark it `Proposed` or `Unverified`.
 5. Update stable `PROJECT.md` content only when the underlying project truth changed.
 6. Clear resolved work from `HANDOFF.md`; reset it to the empty template when no substantial unfinished work remains.
-7. Report which memory files changed and why.
-8. For a material **write-capable** completed stage, coordinate the native local
+7. Before reporting `Checkpoint: COMPLETE`, perform a **bounded semantic reconciliation of task-relevant current claims** across `PROJECT.md`, `STATUS.md`, `DECISIONS.md`, `SESSION_LOG.md` and any active `HANDOFF.md`:
+   - `STATUS.md` must describe the post-task reality, with actual checks, pending actions, and Git/source/runtime identities distinguished.
+   - `PROJECT.md` must not present an obsolete pre-task stage or “no checkpoint recorded” assertion as **current** once the recorded facts have changed; update its stable project description only where verified truth changed, otherwise point current coordination claims to `STATUS.md`.
+   - Keep `SESSION_LOG.md` strictly append-only. Statements in dated earlier checkpoints remain **historical evidence**, not automatically contradictory current claims. Append the current outcome; do not rewrite old entries to hide an earlier state.
+   - Label a formerly failing RED test or other pre-fix evidence as **historical/pre-change**, distinct from current verification.
+   - Do not label tests, code, README or a descriptive source-of-truth table as `Approved intent` without explicit approval provenance. Preserve uncertain intent as unverified; do not manufacture approval or silently alter consequential decisions.
+   Only correct task-relevant, evidenced stale current statements within the active write policy. If a material inconsistency cannot be reconciled without prohibited writes or unapproved decisions, report `Checkpoint: PENDING` and the exact conflict, even when code and structural audit pass. Do not require edits to unchanged files merely to satisfy this review.
+8. Report which memory files changed and why.
+9. For a material **write-capable** completed stage, coordinate the native local
    Git checkpoint **after** affected product documentation and project-memory
    updates, according to `references/local-git-checkpoints.md`. Apply the
    independent project-local policy. An Audit, a read-only task, or an explicit
