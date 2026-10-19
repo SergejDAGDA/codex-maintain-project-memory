@@ -30,7 +30,7 @@
 
 This table maps **stable evidence roles to their authoritative sources**. Describe what
 each source can establish, not the project's transient current results. Do not
-copy failing/passing test results, current bugs, task completion, blockers or next
+copy passing test results, failing tests, current bugs, task completion, blockers or next
 steps from `STATUS.md` into these rows. Leave the `Approved intent` source
 as `TBD` unless a concrete user approval or explicitly governing approved source
 is identified; code, tests and descriptive project files alone do not prove approval.
