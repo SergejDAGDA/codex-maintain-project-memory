@@ -2,7 +2,11 @@
 
 [Русская версия](README.ru.md)
 
-A portable Codex skill for initializing, updating, auditing, adopting, and handing off durable project memory. It keeps stable project guidance, current state, decisions, chronological history, and unfinished-work context in separate files.
+A portable Agent Skill for initializing, updating, auditing, adopting, and handing off durable project memory in Codex Desktop. It keeps stable project guidance, current state, decisions, chronological history, and unfinished-work context in separate files.
+
+**Repository:** `SergejDAGDA/maintain-project-memory-skill`. **Installed Skill ID:** `maintain-project-memory` (directory `skills/maintain-project-memory/`, invocation `$maintain-project-memory`). The `-skill` suffix belongs only to the GitHub repository. Existing protocol `maintain-project-memory/v2` and schema `project-memory/v1` are unchanged.
+
+**Installation provenance:** the checker uses the canonical GitHub URL exactly. Existing receipts naming the former `codex-maintain-project-memory` repository are preserved as history, but do not validate a new installation. After separately approved installation of the new release, record a new receipt against a verified release commit. Repository renaming alone does not authorize updating local skill files or provenance.
 
 ## What it does
 
@@ -120,7 +124,7 @@ The exact safe native Git workflow, staging guards and revision semantics
 are in `references/local-git-checkpoints.md`. This does not promise
 automatic invocation in sessions that ignore the repository's `AGENTS.md`.
 
-**Installable skill version: 0.1.6.** The installed
+**Installable skill version: 0.1.7.** The installed
 `skills/maintain-project-memory/VERSION` marker is independent of the
 project-memory protocol/schema markers.
 

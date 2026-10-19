@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Dict, Optional, Tuple
 
 
-CANONICAL_REPOSITORY = "SergejDAGDA/codex-maintain-project-memory"
+CANONICAL_REPOSITORY = "SergejDAGDA/maintain-project-memory-skill"
 CANONICAL_BRANCH = "main"
 SKILL_PREFIX = "skills/maintain-project-memory/"
 API_BASE = f"https://api.github.com/repos/{CANONICAL_REPOSITORY}"
